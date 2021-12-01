@@ -5,6 +5,7 @@ import 'package:kioku/service/database.dart';
 abstract class DataProvider with ChangeNotifier {
   final String tableName;
   final BaseModel model;
+  late Future<bool> isInitCompleted;
   @protected
   bool isTableCreated = false;
 
@@ -12,7 +13,7 @@ abstract class DataProvider with ChangeNotifier {
     required this.tableName,
     required this.model,
   }) {
-    fetch();
+    isInitCompleted = fetch();
   }
 
   @protected
@@ -24,8 +25,9 @@ abstract class DataProvider with ChangeNotifier {
   }
 
   @protected
-  Future fetch() async {
+  Future<bool> fetch() async {
     if (!isTableCreated) await createTable();
+    return true;
     // Important: extend this function and call notifyListeners() finally
   }
 }

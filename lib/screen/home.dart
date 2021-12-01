@@ -15,6 +15,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<BookProvider>();
+    final books = provider.books;
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
@@ -51,14 +53,20 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         body: Center(
-            child: Consumer<BookProvider>(
-                builder: (_, provider, __) => GridView.count(
+            child: FutureBuilder(
+                future: provider.isInitCompleted,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return GridView.count(
                       primary: false,
                       padding: const EdgeInsets.all(20),
                       mainAxisSpacing: 40,
                       crossAxisCount: 2,
-                      children:
-                          provider.books.map((b) => BookWidget(b)).toList(),
-                    ))));
+                      children: books.map((b) => BookWidget(b)).toList(),
+                    );
+                  } else {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                })));
   }
 }

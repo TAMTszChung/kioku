@@ -14,10 +14,11 @@ class BookProvider extends DataProvider {
   List<Book> get books => [..._books];
 
   @override
-  Future fetch() async {
+  Future<bool> fetch() async {
     super.fetch();
     // TODO: set _books
-    _books = [Book(color: Colors.blue)];
+    _books = [Book(color: Colors.blue), Book(color: Colors.yellow)];
     notifyListeners();
+    return true;
   }
 }
