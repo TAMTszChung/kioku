@@ -19,7 +19,7 @@ class BookWidget extends StatelessWidget {
               Navigator.pushNamed(
                 context,
                 '/book_overview',
-                arguments: book,
+                arguments: book.id,
               );
             },
             child: Container(

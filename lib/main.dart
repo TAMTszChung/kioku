@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:kioku/model/book.dart';
 import 'package:kioku/provider/book.dart';
 import 'package:kioku/screen/book_overview.dart';
 import 'package:kioku/screen/home.dart';
@@ -71,7 +70,7 @@ class _AppScreenState extends State<AppScreen> {
     switch (settings.name) {
       case '/book_overview':
       default:
-        if (args is! Book) return null;
+        if (args is! int) return null;
         return MaterialPageRoute(builder: (context) {
           return BookOverview(args);
         });

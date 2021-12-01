@@ -13,7 +13,7 @@ abstract class DataProvider with ChangeNotifier {
     required this.tableName,
     required this.model,
   }) {
-    isInitCompleted = fetch();
+    isInitCompleted = fetchAll();
   }
 
   @protected
@@ -25,7 +25,7 @@ abstract class DataProvider with ChangeNotifier {
   }
 
   @protected
-  Future<bool> fetch() async {
+  Future<bool> fetchAll() async {
     if (!isTableCreated) await createTable();
     return true;
     // Important: extend this function and call notifyListeners() finally

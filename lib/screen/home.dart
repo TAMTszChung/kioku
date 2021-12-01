@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: <Widget>[
             IconButton(
               onPressed: () {
-                provider.insert(Book(title: 'AAA'));
+                provider.insert(Book());
               },
               icon: const Icon(Icons.add),
               color: Colors.black,
