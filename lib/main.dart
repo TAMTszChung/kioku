@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:kioku/screens/home.dart';
-import 'package:kioku/screens/search.dart';
-import 'package:kioku/screens/share.dart';
+import 'package:kioku/screen/home.dart';
+import 'package:kioku/screen/search.dart';
+import 'package:kioku/screen/share.dart';
 
 void main() => runApp(const MyApp());
 
