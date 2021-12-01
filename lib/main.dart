@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:kioku/provider/book.dart';
 import 'package:kioku/screen/home.dart';
 import 'package:kioku/screen/search.dart';
 import 'package:kioku/screen/share.dart';
+import 'package:provider/provider.dart';
 
 void main() => runApp(const MyApp());
 
@@ -11,30 +13,34 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Kioku',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-        appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFFFAFAFA),
-            elevation: 0.5,
-            titleTextStyle: TextStyle(
-                color: Colors.black,
-                fontFamily: "sans-serif",
-                fontSize: 16,
-                fontWeight: FontWeight.w500)),
-      ),
-      home: const AppScreen(title: 'kioku'),
-    );
+    return MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => BookProvider()),
+        ],
+        child: MaterialApp(
+          title: 'Kioku',
+          theme: ThemeData(
+            // This is the theme of your application.
+            //
+            // Try running your application with "flutter run". You'll see the
+            // application has a blue toolbar. Then, without quitting the app, try
+            // changing the primarySwatch below to Colors.green and then invoke
+            // "hot reload" (press "r" in the console where you ran "flutter run",
+            // or simply save your changes to "hot reload" in a Flutter IDE).
+            // Notice that the counter didn't reset back to zero; the application
+            // is not restarted.
+            primarySwatch: Colors.blue,
+            appBarTheme: const AppBarTheme(
+                backgroundColor: Color(0xFFFAFAFA),
+                elevation: 0.5,
+                titleTextStyle: TextStyle(
+                    color: Colors.black,
+                    fontFamily: "sans-serif",
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500)),
+          ),
+          home: const AppScreen(title: 'kioku'),
+        ));
   }
 }
 
@@ -75,12 +81,6 @@ class _AppScreenState extends State<AppScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        // actions: <Widget>[
-        //   IconButton(onPressed: () => {}, icon: const Icon(Icons.add)),
-        // ],
-      ),
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
