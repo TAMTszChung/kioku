@@ -1,18 +1,27 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:kioku/model/base.dart';
 import 'package:kioku/service/database.dart';
 
 class BookModel extends BaseModel {
+  static const id = 'id';
+  static const title = 'title';
+  static const color = 'color';
+  static const cover = 'cover';
+  static const createTime = 'createTime';
+  static const lastModifiedTime = 'lastModifiedTime';
+
   BookModel()
-      : super(fields: [
-          DBField(name: 'id', type: DBType.id()),
-          DBField(name: 'title', type: DBType.text(notNull: true)),
-          DBField(name: 'color', type: DBType.int(notNull: true)),
-          DBField(name: 'cover', type: DBType.blob()),
-          DBField(name: 'createTime', type: DBType.int(notNull: true)),
-          DBField(name: 'lastModifiedTime', type: DBType.int(notNull: true)),
-        ]);
+      : super(
+            fields: DBFields([
+          DBField(name: id, type: DBType.id()),
+          DBField(name: title, type: DBType.text(notNull: true)),
+          DBField(name: color, type: DBType.int(notNull: true)),
+          DBField(name: cover, type: DBType.blob()),
+          DBField(name: createTime, type: DBType.int(notNull: true)),
+          DBField(name: lastModifiedTime, type: DBType.int(notNull: true)),
+        ]));
 }
 
 class Book {
@@ -23,11 +32,17 @@ class Book {
   DateTime? createTime; // create time from database
   DateTime? lastModifiedTime; // last modified time from database
 
-  Book({this.title = "Untitled", Color? color}) {
-    if (color == null) {
-      // TODO: generate a random color
-    }
-    this.color = color!;
+  Book({this.title = "Untitled", this.color = Colors.grey});
+
+  Book.fromJson(Map<String, Object?> json) {
+    id = json[BookModel.id] as int?;
+    title = json[BookModel.title] as String;
+    color = Color(json[BookModel.color] as int);
+    cover = json[BookModel.cover] as String?;
+    createTime =
+        DateTime.fromMillisecondsSinceEpoch(json[BookModel.createTime] as int);
+    lastModifiedTime = DateTime.fromMillisecondsSinceEpoch(
+        json[BookModel.lastModifiedTime] as int);
   }
 
   Book._copy({
@@ -58,4 +73,13 @@ class Book {
     if (modified != null) lastModifiedTime = modified;
     return this;
   }
+
+  Map<String, Object?> toJson() => {
+        BookModel.id: id,
+        BookModel.title: title,
+        BookModel.color: color.value,
+        BookModel.cover: cover,
+        BookModel.createTime: createTime?.millisecondsSinceEpoch,
+        BookModel.lastModifiedTime: lastModifiedTime?.millisecondsSinceEpoch,
+      };
 }

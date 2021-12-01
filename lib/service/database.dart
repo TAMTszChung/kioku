@@ -38,6 +38,27 @@ class DBField {
   String toString() => '$name $type';
 }
 
+class DBFields {
+  late final Map<String, DBField> fields;
+  DBFields(List<DBField> fields) {
+    this.fields =
+        Map<String, DBField>.fromIterable(fields, key: (field) => field.name);
+  }
+
+  DBField? operator [](String name) => fields[name];
+
+  @override
+  String toString() {
+    const delimiter = ', ';
+    String result = '';
+    for (var field in fields.values) {
+      result += field.toString();
+      if (field != fields.values.last) result += delimiter;
+    }
+    return result;
+  }
+}
+
 class DBHelper {
   static const _dbName = 'kioku.db';
   static const _dbVersion = 1;
@@ -55,19 +76,15 @@ class DBHelper {
   Future<sql.Database> _initDB() async {
     String dbPath = await sql.getDatabasesPath();
     dbPath = path.join(dbPath, _dbName);
+    // TODO: remove this delete statement in production
+    await sql.deleteDatabase(dbPath);
     return await sql.openDatabase(dbPath, version: _dbVersion);
   }
 
   Future createTable(
-      {required String tableName, required List<DBField> fields}) async {
+      {required String tableName, required DBFields fields}) async {
     final db = await this.db;
-    const delimiter = ', ';
-    String stmt = 'CREATE TABLE IF NOT EXISTS $tableName (';
-    for (var field in fields) {
-      stmt += field.toString();
-      if (field != fields.last) stmt += delimiter;
-    }
-    stmt += ');';
+    String stmt = 'CREATE TABLE IF NOT EXISTS $tableName ($fields);';
     await db.execute(stmt);
   }
 }

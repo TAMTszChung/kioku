@@ -1,5 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:kioku/model/book.dart';
 import 'package:kioku/provider/book.dart';
+import 'package:kioku/screen/book_overview.dart';
 import 'package:kioku/screen/home.dart';
 import 'package:kioku/screen/search.dart';
 import 'package:kioku/screen/share.dart';
@@ -35,7 +38,7 @@ class MyApp extends StatelessWidget {
                 elevation: 0.5,
                 titleTextStyle: TextStyle(
                     color: Colors.black,
-                    fontFamily: "sans-serif",
+                    fontFamily: 'sans-serif',
                     fontSize: 16,
                     fontWeight: FontWeight.w500)),
           ),
@@ -63,28 +66,22 @@ class AppScreen extends StatefulWidget {
 }
 
 class _AppScreenState extends State<AppScreen> {
-  int _selectedIndex = 0;
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  static const List<Widget> _widgetOptions = <Widget>[
-    HomeScreen(),
-    SearchScreen(),
-    ShareScreen(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  Route? _onGenerateRoute(settings) {
+    final args = settings.arguments;
+    switch (settings.name) {
+      case '/book_overview':
+      default:
+        if (args is! Book) return null;
+        return MaterialPageRoute(builder: (context) {
+          return BookOverview(args);
+        });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
+    return CupertinoTabScaffold(
+      tabBar: CupertinoTabBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.book),
@@ -99,12 +96,36 @@ class _AppScreenState extends State<AppScreen> {
             label: 'Share',
           ),
         ],
-        currentIndex: _selectedIndex,
-        elevation: 8.0,
-        iconSize: 20,
-        selectedItemColor: Colors.blueAccent,
-        onTap: _onItemTapped,
       ),
+      tabBuilder: (context, index) {
+        switch (index) {
+          case 2:
+            return CupertinoTabView(
+                builder: (context) {
+                  return const CupertinoPageScaffold(
+                    child: ShareScreen(),
+                  );
+                },
+                onGenerateRoute: _onGenerateRoute);
+          case 1:
+            return CupertinoTabView(
+                builder: (context) {
+                  return const CupertinoPageScaffold(
+                    child: SearchScreen(),
+                  );
+                },
+                onGenerateRoute: _onGenerateRoute);
+          case 0:
+          default:
+            return CupertinoTabView(
+                builder: (context) {
+                  return const CupertinoPageScaffold(
+                    child: HomeScreen(),
+                  );
+                },
+                onGenerateRoute: _onGenerateRoute);
+        }
+      },
     );
   }
 }

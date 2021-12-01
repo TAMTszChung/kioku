@@ -18,7 +18,7 @@ class _ShareScreenState extends State<ShareScreen> {
       ),
       body: const Center(
         child: Text(
-          'Search Screen',
+          'Share Screen',
         ),
       ),
     );
