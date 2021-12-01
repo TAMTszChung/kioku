@@ -14,16 +14,28 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _sortType = "Title";
+  String _sortType = "Title (Ascending)";
 
   void sortBook(List<Book> list, String type) {
     setState(() {
       switch (type) {
-        case "Title":
+        case "Title (Ascending)":
           list.sort((a, b) => a.title.compareTo(b.title));
           break;
-        case "Date":
+        case "Title (Descending)":
           list.sort((a, b) => b.title.compareTo(a.title));
+          break;
+        case "Create Date (Ascending)":
+          list.sort((a, b) => a.createTime.compareTo(b.createTime));
+          break;
+        case "Create Date (Descending)":
+          list.sort((a, b) => b.createTime.compareTo(a.createTime));
+          break;
+        case "Last Modified (Ascending)":
+          list.sort((a, b) => a.lastModifiedTime.compareTo(b.lastModifiedTime));
+          break;
+        case "Last Modified (Descending)":
+          list.sort((a, b) => b.lastModifiedTime.compareTo(a.lastModifiedTime));
           break;
         default:
           list.sort((a, b) => a.title.compareTo(b.title));
@@ -44,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: <Widget>[
             IconButton(
               onPressed: () {
-                provider.insert(Book());
+                provider.insert(Book(title: 'AAA'));
               },
               icon: const Icon(Icons.add),
               color: Colors.black,
@@ -69,12 +81,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: 1,
                 ),
                 const PopupMenuItem<String>(
-                  value: "Title (",
-                  child: Text('Title'),
+                  value: "Title (Ascending)",
+                  child: Text('Title (Ascending)'),
                 ),
                 const PopupMenuItem<String>(
-                  value: "Date",
-                  child: Text('Date'),
+                  value: "Title (Descending)",
+                  child: Text('Title (Descending)'),
+                ),
+                const PopupMenuItem<String>(
+                  value: "Create Date (Ascending)",
+                  child: Text('Create Date (Ascending)'),
+                ),
+                const PopupMenuItem<String>(
+                  value: "Create Date (Descending)",
+                  child: Text('Create Date (Descending)'),
+                ),
+                const PopupMenuItem<String>(
+                  value: "Last Modified (Ascending)",
+                  child: Text('Last Modified (Ascending)'),
+                ),
+                const PopupMenuItem<String>(
+                  value: "Last Modified (Descending)",
+                  child: Text('Last Modified (Descending)'),
                 ),
               ],
             )

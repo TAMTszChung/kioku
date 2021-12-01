@@ -29,10 +29,14 @@ class Book {
   late String title; // title
   late Color color; // color of cover
   String? cover; // image of cover in base64
-  DateTime? createTime; // create time from database
-  DateTime? lastModifiedTime; // last modified time from database
+  late final DateTime createTime; // create time from database
+  late DateTime lastModifiedTime; // last modified time from database
 
-  Book({this.title = "Untitled", this.color = Colors.grey});
+  Book({this.title = "Untitled", this.color = Colors.grey}) {
+    final timestamp = DateTime.now();
+    createTime = timestamp;
+    lastModifiedTime = timestamp;
+  }
 
   Book.fromJson(Map<String, Object?> json) {
     id = json[BookModel.id] as int?;
@@ -46,32 +50,34 @@ class Book {
   }
 
   Book._copy({
-    required this.id,
-    DateTime? createTime,
-    required Book original,
-  }) {
-    title = original.title;
-    color = original.color;
-    cover = original.cover;
-    this.createTime = createTime ?? original.createTime;
-    lastModifiedTime = createTime ?? original.lastModifiedTime;
-  }
-
-  Book copy({required id, DateTime? copyTime}) {
-    return Book._copy(id: id, createTime: copyTime, original: this);
-  }
-
-  Book update({
+    int? id,
     String? title,
     Color? color,
     String? cover,
-    DateTime? modified,
+    DateTime? createTime,
+    DateTime? lastModifiedTime,
+    required Book original,
   }) {
-    if (title != null) this.title = title;
-    if (color != null) this.color = color;
-    if (cover != null) this.cover = cover;
-    if (modified != null) lastModifiedTime = modified;
-    return this;
+    this.id = id ?? original.id;
+    this.title = title ?? original.title;
+    this.color = color ?? original.color;
+    this.cover = cover ?? original.cover;
+    this.createTime = createTime ?? original.createTime;
+    this.lastModifiedTime = lastModifiedTime ?? original.lastModifiedTime;
+  }
+
+  Book copy({
+    String? title,
+    Color? color,
+    String? cover,
+    DateTime? lastModifiedTime,
+  }) {
+    return Book._copy(
+        title: title,
+        color: color,
+        cover: cover,
+        lastModifiedTime: lastModifiedTime,
+        original: this);
   }
 
   Map<String, Object?> toJson() => {
@@ -79,7 +85,7 @@ class Book {
         BookModel.title: title,
         BookModel.color: color.value,
         BookModel.cover: cover,
-        BookModel.createTime: createTime?.millisecondsSinceEpoch,
-        BookModel.lastModifiedTime: lastModifiedTime?.millisecondsSinceEpoch,
+        BookModel.createTime: createTime.millisecondsSinceEpoch,
+        BookModel.lastModifiedTime: lastModifiedTime.millisecondsSinceEpoch,
       };
 }

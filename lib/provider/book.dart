@@ -27,9 +27,6 @@ class BookProvider extends DataProvider {
   Future<Book?> insert(Book book) async {
     final db = await DBHelper.instance.db;
     final data = book.toJson();
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    data[BookModel.createTime] = timestamp;
-    data[BookModel.lastModifiedTime] = timestamp;
     final id = await db.insert(tableName, data);
     final insertedBook = await get(id);
     if (insertedBook == null) return null;
@@ -47,5 +44,25 @@ class BookProvider extends DataProvider {
     } else {
       return null;
     }
+  }
+
+  Future<Book?> update(Book bookToUpdate) async {
+    final db = await DBHelper.instance.db;
+    final data = bookToUpdate.toJson();
+    final id = data[BookModel.id] as int?;
+    if (id == null) throw Exception('id property cannot be null');
+    data.remove(BookModel.id);
+    final count = await db
+        .update(tableName, data, where: '${BookModel.id} = ?', whereArgs: [id]);
+    if (count != 1) throw Exception('Cannot update book with id $id');
+    final updatedBook = await get(id);
+    if (updatedBook == null) return null;
+    var index = _books.indexWhere((book) => book.id == id);
+    if (index < 0) {
+      _books.add(updatedBook);
+    } else {
+      _books[index] = updatedBook;
+    }
+    return updatedBook;
   }
 }
