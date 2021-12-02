@@ -41,30 +41,30 @@ class _PromptDialog extends StatefulWidget {
 
 class _PromptDialogState extends State<_PromptDialog> {
   final TextEditingController _textFieldController = TextEditingController();
-  String errorText = "";
+  String errorText = '';
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(widget.title),
       content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _textFieldController,
-              decoration: InputDecoration(hintText: widget.hintText),
-            ),
-            Visibility(
-              child: Padding(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _textFieldController,
+            decoration: InputDecoration(hintText: widget.hintText),
+          ),
+          Visibility(
+            child: Padding(
                 padding: const EdgeInsets.only(top: 20.0),
-                  child:Text(
-                errorText,
-                style: const TextStyle(color: Colors.red),
-              )),
-              visible: errorText.isNotEmpty,
-            )
-          ],
-        ),
+                child: Text(
+                  errorText,
+                  style: const TextStyle(color: Colors.red),
+                )),
+            visible: errorText.isNotEmpty,
+          )
+        ],
+      ),
       actions: <Widget>[
         TextButton(
           child: Text(widget.cancelText),

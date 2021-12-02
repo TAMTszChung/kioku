@@ -16,13 +16,13 @@ class PageModel extends BaseModel {
           DBCol(name: pageNumber, type: DBType.int(notNull: true)),
           DBCol(name: createTime, type: DBType.int(notNull: true)),
           DBCol(name: lastModifiedTime, type: DBType.int(notNull: true)),
-        ], foreignKeyGroups: [
+        ], foreignKeys: [
           DBForeignKey(
               colNames: [bookId],
               foreignTableName: bookTableName,
               foreignTableColNames: [bookTableIdCol.name]),
-        ], uniqueIndexesGroups: [
-          [1, 2]
+        ], uniqueColNames: [
+          [bookId, pageNumber],
         ]));
 }
 

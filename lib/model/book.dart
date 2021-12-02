@@ -32,7 +32,7 @@ class Book {
   late final DateTime createTime; // create time from database
   late DateTime lastModifiedTime; // last modified time from database
 
-  Book({this.title = "Untitled", this.color = Colors.grey}) {
+  Book({this.title = 'Untitled', this.color = Colors.grey}) {
     final timestamp = DateTime.now();
     createTime = timestamp;
     lastModifiedTime = timestamp;

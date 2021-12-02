@@ -106,16 +106,11 @@ class DBCol {
 
 class DBCols {
   late final Map<String, DBCol> cols;
-  late final List<DBForeignKey> foreignKeyGroups;
-  late final List<List<String>> uniqueColsGroups;
+  final List<DBForeignKey> foreignKeys;
+  final List<List<String>> uniqueColNames;
   DBCols(List<DBCol> cols,
-      {this.foreignKeyGroups = const [],
-      List<List<int>> uniqueIndexesGroups = const []}) {
+      {this.foreignKeys = const [], this.uniqueColNames = const []}) {
     this.cols = Map<String, DBCol>.fromIterable(cols, key: (col) => col.name);
-    uniqueColsGroups = uniqueIndexesGroups
-        .map((group) =>
-            group.map((index) => cols[index].name).toList(growable: false))
-        .toList(growable: false);
   }
 
   DBCol? operator [](String name) => cols[name];
@@ -125,13 +120,12 @@ class DBCols {
     String str = '';
     str += cols.values.map((field) => field.toString()).join(', ');
     final foreignKeysStr =
-        foreignKeyGroups.map((group) => group.toString()).join(', ');
+        foreignKeys.map((group) => group.toString()).join(', ');
     if (foreignKeysStr.isNotEmpty) {
       str += ', $foreignKeysStr';
     }
-    final uniqueColsStr = uniqueColsGroups
-        .map((group) => group.join(', '))
-        .map((groupStr) => 'UNIQUE($groupStr)')
+    final uniqueColsStr = uniqueColNames
+        .map((colNames) => 'UNIQUE(${colNames.join(', ')})')
         .join(', ');
     if (uniqueColsStr.isNotEmpty) {
       str += ', $uniqueColsStr';

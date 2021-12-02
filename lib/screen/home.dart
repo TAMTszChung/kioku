@@ -8,34 +8,34 @@ import 'package:provider/provider.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
-  final String title = "Kioku";
+  final String title = 'Kioku';
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _sortType = "Title (Ascending)";
+  String _sortType = 'Title (Ascending)';
 
   void sortBook(List<Book> list, String type) {
     setState(() {
       switch (type) {
-        case "Title (Ascending)":
+        case 'Title (Ascending)':
           list.sort((a, b) => a.title.compareTo(b.title));
           break;
-        case "Title (Descending)":
+        case 'Title (Descending)':
           list.sort((a, b) => b.title.compareTo(a.title));
           break;
-        case "Create Date (Ascending)":
+        case 'Create Date (Ascending)':
           list.sort((a, b) => a.createTime.compareTo(b.createTime));
           break;
-        case "Create Date (Descending)":
+        case 'Create Date (Descending)':
           list.sort((a, b) => b.createTime.compareTo(a.createTime));
           break;
-        case "Last Modified (Ascending)":
+        case 'Last Modified (Ascending)':
           list.sort((a, b) => a.lastModifiedTime.compareTo(b.lastModifiedTime));
           break;
-        case "Last Modified (Descending)":
+        case 'Last Modified (Descending)':
           list.sort((a, b) => b.lastModifiedTime.compareTo(a.lastModifiedTime));
           break;
         default:
@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     okText: 'OK',
                     cancelText: 'Cancel', validator: (text) {
                   if (text == null || text.isEmpty) {
-                    return "Title cannot be empty";
+                    return 'Title cannot be empty';
                   }
                   return null;
                 });
@@ -87,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 const PopupMenuItem<String>(
-                  value: "Sort By:",
+                  value: 'Sort By:',
                   child: Text('Sort By'),
                   enabled: false,
                 ),
@@ -95,27 +95,27 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: 1,
                 ),
                 const PopupMenuItem<String>(
-                  value: "Title (Ascending)",
+                  value: 'Title (Ascending)',
                   child: Text('Title (Ascending)'),
                 ),
                 const PopupMenuItem<String>(
-                  value: "Title (Descending)",
+                  value: 'Title (Descending)',
                   child: Text('Title (Descending)'),
                 ),
                 const PopupMenuItem<String>(
-                  value: "Create Date (Ascending)",
+                  value: 'Create Date (Ascending)',
                   child: Text('Create Date (Ascending)'),
                 ),
                 const PopupMenuItem<String>(
-                  value: "Create Date (Descending)",
+                  value: 'Create Date (Descending)',
                   child: Text('Create Date (Descending)'),
                 ),
                 const PopupMenuItem<String>(
-                  value: "Last Modified (Ascending)",
+                  value: 'Last Modified (Ascending)',
                   child: Text('Last Modified (Ascending)'),
                 ),
                 const PopupMenuItem<String>(
-                  value: "Last Modified (Descending)",
+                  value: 'Last Modified (Descending)',
                   child: Text('Last Modified (Descending)'),
                 ),
               ],

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
 
-  final String title = "Search";
+  final String title = 'Search';
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();

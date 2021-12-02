@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ShareScreen extends StatefulWidget {
   const ShareScreen({Key? key}) : super(key: key);
 
-  final String title = "Share Your Collection Books";
+  final String title = 'Share Your Collection Books';
 
   @override
   State<ShareScreen> createState() => _ShareScreenState();
