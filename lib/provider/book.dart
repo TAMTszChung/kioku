@@ -50,7 +50,9 @@ class BookProvider extends DataProvider {
     final db = await DBHelper.instance.db;
     final data = bookToUpdate.toJson();
     final id = data[BookModel.id] as int?;
-    if (id == null) throw Exception('id property cannot be null');
+    if (id == null) {
+      throw ArgumentError('id property cannot be null', 'bookToUpdate');
+    }
     data.remove(BookModel.id);
     final count = await db
         .update(tableName, data, where: '${BookModel.id} = ?', whereArgs: [id]);

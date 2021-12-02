@@ -37,6 +37,7 @@ dependencies:
   sqflite: ^2.0.0+4
   provider: ^6.0.1
   collection: ^1.15.0
+  extension: ^0.2.0
 
 dev_dependencies:
   flutter_test:

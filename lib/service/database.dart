@@ -4,6 +4,7 @@ import 'package:sqflite/sqflite.dart' as sql;
 class DBType {
   static const _textType = 'TEXT';
   static const _blobType = 'BLOB';
+  static const _realType = 'REAL';
   static const _intType = 'INTEGER';
   static const _notNull = 'NOT NULL';
   static const _primaryKey = 'PRIMARY KEY';
@@ -32,6 +33,9 @@ class DBType {
   DBType.blob({bool notNull = false, bool primaryKey = false})
       : this._internal(
             type: _blobType, notNull: notNull, primaryKey: primaryKey);
+
+  DBType.real({bool notNull = false})
+      : this._internal(type: _realType, notNull: notNull);
 
   DBType.int(
       {bool notNull = false,
@@ -105,12 +109,22 @@ class DBCol {
 }
 
 class DBCols {
-  late final Map<String, DBCol> cols;
+  final Map<String, DBCol> cols;
   final List<DBForeignKey> foreignKeys;
   final List<List<String>> uniqueColNames;
-  DBCols(List<DBCol> cols,
-      {this.foreignKeys = const [], this.uniqueColNames = const []}) {
-    this.cols = Map<String, DBCol>.fromIterable(cols, key: (col) => col.name);
+
+  const DBCols._internal(
+      {required this.cols,
+      required this.foreignKeys,
+      required this.uniqueColNames});
+
+  factory DBCols(List<DBCol> cols,
+      {List<DBForeignKey> foreignKeys = const [],
+      List<List<String>> uniqueColNames = const []}) {
+    return DBCols._internal(
+        cols: Map<String, DBCol>.fromIterable(cols, key: (col) => col.name),
+        foreignKeys: foreignKeys,
+        uniqueColNames: uniqueColNames);
   }
 
   DBCol? operator [](String name) => cols[name];

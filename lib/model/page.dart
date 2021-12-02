@@ -29,28 +29,39 @@ class PageModel extends BaseModel {
 
 class Page {
   int? id; // id from database
-  late int bookId; // id of book owning this page
-  late int pageNumber; // page number in the book
-  late final DateTime createTime; // create time from database
-  late DateTime lastModifiedTime; // last modified time from database
+  int bookId; // id of book owning this page
+  int pageNumber; // page number in the book
+  final DateTime createTime; // create time from database
+  DateTime lastModifiedTime; // last modified time from database
 
-  Page({required this.bookId, required this.pageNumber}) {
+  Page._internal(
+      {this.id,
+      required this.bookId,
+      required this.pageNumber,
+      required this.createTime,
+      required this.lastModifiedTime});
+
+  factory Page({required int bookId, required int pageNumber}) {
     final timestamp = DateTime.now();
-    createTime = timestamp;
-    lastModifiedTime = timestamp;
+    return Page._internal(
+        bookId: bookId,
+        pageNumber: pageNumber,
+        createTime: timestamp,
+        lastModifiedTime: timestamp);
   }
 
-  Page.fromJson(Map<String, Object?> json) {
-    id = json[PageModel.id] as int;
-    bookId = json[PageModel.bookId] as int;
-    pageNumber = json[PageModel.pageNumber] as int;
-    createTime =
-        DateTime.fromMillisecondsSinceEpoch(json[PageModel.createTime] as int);
-    lastModifiedTime = DateTime.fromMillisecondsSinceEpoch(
-        json[PageModel.lastModifiedTime] as int);
+  factory Page.fromJson(Map<String, Object?> json) {
+    return Page._internal(
+        id: json[PageModel.id] as int,
+        bookId: json[PageModel.bookId] as int,
+        pageNumber: json[PageModel.pageNumber] as int,
+        createTime: DateTime.fromMillisecondsSinceEpoch(
+            json[PageModel.createTime] as int),
+        lastModifiedTime: DateTime.fromMillisecondsSinceEpoch(
+            json[PageModel.lastModifiedTime] as int));
   }
 
-  Page._copy({
+  factory Page._copy({
     int? id,
     int? bookId,
     int? pageNumber,
@@ -58,11 +69,12 @@ class Page {
     DateTime? lastModifiedTime,
     required Page original,
   }) {
-    this.id = id ?? original.id;
-    this.bookId = bookId ?? original.bookId;
-    this.pageNumber = pageNumber ?? original.pageNumber;
-    this.createTime = createTime ?? original.createTime;
-    this.lastModifiedTime = lastModifiedTime ?? original.lastModifiedTime;
+    return Page._internal(
+        id: id ?? original.id,
+        bookId: bookId ?? original.bookId,
+        pageNumber: pageNumber ?? original.pageNumber,
+        createTime: createTime ?? original.createTime,
+        lastModifiedTime: lastModifiedTime ?? original.lastModifiedTime);
   }
 
   Page copy({

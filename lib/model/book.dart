@@ -27,30 +27,42 @@ class BookModel extends BaseModel {
 
 class Book {
   int? id; // id from database
-  late String title; // title
-  late Color color; // color of cover
+  String title; // title
+  Color color; // color of cover
   String? cover; // image of cover in base64
-  late final DateTime createTime; // create time from database
-  late DateTime lastModifiedTime; // last modified time from database
+  final DateTime createTime; // create time from database
+  DateTime lastModifiedTime; // last modified time from database
 
-  Book({this.title = 'Untitled', this.color = Colors.grey}) {
+  Book._internal(
+      {this.id,
+      required this.title,
+      required this.color,
+      this.cover,
+      required this.createTime,
+      required this.lastModifiedTime});
+
+  factory Book({String title = 'Untitled', Color color = Colors.grey}) {
     final timestamp = DateTime.now();
-    createTime = timestamp;
-    lastModifiedTime = timestamp;
+    return Book._internal(
+        title: title,
+        color: color,
+        createTime: timestamp,
+        lastModifiedTime: timestamp);
   }
 
-  Book.fromJson(Map<String, Object?> json) {
-    id = json[BookModel.id] as int;
-    title = json[BookModel.title] as String;
-    color = Color(json[BookModel.color] as int);
-    cover = json[BookModel.cover] as String?;
-    createTime =
-        DateTime.fromMillisecondsSinceEpoch(json[BookModel.createTime] as int);
-    lastModifiedTime = DateTime.fromMillisecondsSinceEpoch(
-        json[BookModel.lastModifiedTime] as int);
+  factory Book.fromJson(Map<String, Object?> json) {
+    return Book._internal(
+        id: json[BookModel.id] as int,
+        title: json[BookModel.title] as String,
+        color: Color(json[BookModel.color] as int),
+        cover: json[BookModel.cover] as String?,
+        createTime: DateTime.fromMillisecondsSinceEpoch(
+            json[BookModel.createTime] as int),
+        lastModifiedTime: DateTime.fromMillisecondsSinceEpoch(
+            json[BookModel.lastModifiedTime] as int));
   }
 
-  Book._copy({
+  factory Book._copy({
     int? id,
     String? title,
     Color? color,
@@ -59,12 +71,13 @@ class Book {
     DateTime? lastModifiedTime,
     required Book original,
   }) {
-    this.id = id ?? original.id;
-    this.title = title ?? original.title;
-    this.color = color ?? original.color;
-    this.cover = cover ?? original.cover;
-    this.createTime = createTime ?? original.createTime;
-    this.lastModifiedTime = lastModifiedTime ?? original.lastModifiedTime;
+    return Book._internal(
+        id: id ?? original.id,
+        title: title ?? original.title,
+        color: color ?? original.color,
+        cover: cover ?? original.cover,
+        createTime: createTime ?? original.createTime,
+        lastModifiedTime: lastModifiedTime ?? original.lastModifiedTime);
   }
 
   Book copy({

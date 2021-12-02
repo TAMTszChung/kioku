@@ -48,8 +48,9 @@ class PageProvider extends DataProvider {
           .query(tableName, where: '${PageModel.id} = ?', whereArgs: [id]);
     } else {
       if (bookId == null || pageNumber == null) {
-        throw Exception(
-            'Must provide id, or both bookId and pageNumber to fetch');
+        throw ArgumentError(
+            'Must provide id, or both bookId and pageNumber to fetch',
+            'id, bookId, pageNumber');
       }
       maps = await db.query(tableName,
           where: '${PageModel.bookId} = ? AND ${PageModel.pageNumber} = ?',
@@ -66,7 +67,9 @@ class PageProvider extends DataProvider {
     final db = await DBHelper.instance.db;
     final data = pageToUpdate.toJson();
     final id = data[PageModel.id] as int?;
-    if (id == null) throw Exception('id property cannot be null');
+    if (id == null) {
+      throw ArgumentError('id property cannot be null', 'pageToUpdate');
+    }
     data.remove(PageModel.id);
     final count = await db
         .update(tableName, data, where: '${PageModel.id} = ?', whereArgs: [id]);
@@ -90,8 +93,9 @@ class PageProvider extends DataProvider {
       page = _pages.singleWhere((page) => page.id == id);
     } else {
       if (bookId == null || pageNumber == null) {
-        throw Exception(
-            'Must provide id, or both bookId and pageNumber to get');
+        throw ArgumentError(
+            'Must provide id, or both bookId and pageNumber to get',
+            'id, bookId, pageNumber');
       }
       page = _pages.singleWhere(
           (page) => page.bookId == bookId && page.pageNumber == pageNumber);
