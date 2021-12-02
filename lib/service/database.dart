@@ -62,13 +62,24 @@ class DBForeignKey {
   static const _prefix = 'FOREIGN KEY';
   static const _suffix = 'REFERENCES';
 
+  static const _onUpdate = 'ON UPDATE';
+  static const _onDelete = 'ON DELETE';
+
+  static const cascade = 'CASCADE';
+  static const noAction = 'NO ACTION';
+
   final List<String> colNames;
   final String foreignTableName;
   final List<String> foreignTableColNames;
+  final String onUpdateAction;
+  final String onDeleteAction;
+
   DBForeignKey(
       {required this.colNames,
       required this.foreignTableName,
-      this.foreignTableColNames = const []});
+      this.foreignTableColNames = const [],
+      this.onDeleteAction = cascade,
+      this.onUpdateAction = noAction});
 
   @override
   String toString() {
@@ -76,6 +87,7 @@ class DBForeignKey {
     if (foreignTableColNames.isNotEmpty) {
       str += '(${foreignTableColNames.join(', ')})';
     }
+    str += ' $_onUpdate $onUpdateAction $_onDelete $onDeleteAction';
     return str;
   }
 }
