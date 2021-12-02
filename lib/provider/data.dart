@@ -19,8 +19,7 @@ abstract class DataProvider with ChangeNotifier {
   @protected
   Future createTable() async {
     if (isTableCreated) return;
-    await DBHelper.instance
-        .createTable(tableName: tableName, fields: model.fields);
+    await DBHelper.instance.createTable(tableName: tableName, cols: model.cols);
     isTableCreated = true;
   }
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kioku/provider/book.dart';
-import 'package:provider/src/provider.dart';
+import 'package:provider/provider.dart';
 
 class BookOverview extends StatefulWidget {
   final int id;

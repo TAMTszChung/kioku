@@ -14,13 +14,13 @@ class BookModel extends BaseModel {
 
   BookModel()
       : super(
-            fields: DBFields([
-          DBField(name: id, type: DBType.id()),
-          DBField(name: title, type: DBType.text(notNull: true)),
-          DBField(name: color, type: DBType.int(notNull: true)),
-          DBField(name: cover, type: DBType.blob()),
-          DBField(name: createTime, type: DBType.int(notNull: true)),
-          DBField(name: lastModifiedTime, type: DBType.int(notNull: true)),
+            cols: DBCols([
+          DBCol(name: id, type: DBType.rowId()),
+          DBCol(name: title, type: DBType.text(notNull: true)),
+          DBCol(name: color, type: DBType.int(notNull: true)),
+          DBCol(name: cover, type: DBType.blob()),
+          DBCol(name: createTime, type: DBType.int(notNull: true)),
+          DBCol(name: lastModifiedTime, type: DBType.int(notNull: true)),
         ]));
 }
 
@@ -39,7 +39,7 @@ class Book {
   }
 
   Book.fromJson(Map<String, Object?> json) {
-    id = json[BookModel.id] as int?;
+    id = json[BookModel.id] as int;
     title = json[BookModel.title] as String;
     color = Color(json[BookModel.color] as int);
     cover = json[BookModel.cover] as String?;

@@ -2,60 +2,129 @@ import 'package:path/path.dart' as path;
 import 'package:sqflite/sqflite.dart' as sql;
 
 class DBType {
-  static const _idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
   static const _textType = 'TEXT';
   static const _blobType = 'BLOB';
   static const _intType = 'INTEGER';
   static const _notNull = 'NOT NULL';
+  static const _primaryKey = 'PRIMARY KEY';
+  static const _autoIncrement = 'AUTOINCREMENT';
 
   final String type;
   final bool notNull;
+  final bool primaryKey;
+  final bool autoIncrement;
 
-  DBType._internal({required this.type, this.notNull = false});
+  DBType._internal(
+      {required this.type,
+      this.notNull = false,
+      this.primaryKey = false,
+      this.autoIncrement = false});
 
-  DBType.id() : this._internal(type: _idType);
+  DBType.rowId() : this.int(primaryKey: true, autoIncrement: true);
 
-  DBType.text({bool notNull = false})
-      : this._internal(type: _textType, notNull: notNull);
+  DBType.fromForeign(DBType foreignType)
+      : this._internal(type: foreignType.type);
 
-  DBType.blob({bool notNull = false})
-      : this._internal(type: _blobType, notNull: notNull);
+  DBType.text({bool notNull = false, bool primaryKey = false})
+      : this._internal(
+            type: _textType, notNull: notNull, primaryKey: primaryKey);
 
-  DBType.int({bool notNull = false})
-      : this._internal(type: _intType, notNull: notNull);
+  DBType.blob({bool notNull = false, bool primaryKey = false})
+      : this._internal(
+            type: _blobType, notNull: notNull, primaryKey: primaryKey);
 
-  @override
-  String toString() => type + (notNull ? ' $_notNull' : '');
-}
-
-class DBField {
-  final String name;
-  final DBType type;
-
-  DBField({required this.name, required this.type});
-
-  @override
-  String toString() => '$name $type';
-}
-
-class DBFields {
-  late final Map<String, DBField> fields;
-  DBFields(List<DBField> fields) {
-    this.fields =
-        Map<String, DBField>.fromIterable(fields, key: (field) => field.name);
-  }
-
-  DBField? operator [](String name) => fields[name];
+  DBType.int(
+      {bool notNull = false,
+      bool primaryKey = false,
+      bool autoIncrement = false})
+      : this._internal(
+            type: _intType,
+            notNull: notNull,
+            primaryKey: primaryKey,
+            autoIncrement: autoIncrement);
 
   @override
   String toString() {
-    const delimiter = ', ';
-    String result = '';
-    for (var field in fields.values) {
-      result += field.toString();
-      if (field != fields.values.last) result += delimiter;
+    String str = type;
+    if (primaryKey) {
+      str += ' $_primaryKey';
+    } else if (notNull) {
+      str += ' $_notNull';
     }
-    return result;
+    if (type == _intType && autoIncrement) {
+      str += ' $_autoIncrement';
+    }
+    return str;
+  }
+}
+
+class DBForeignKey {
+  static const _prefix = 'FOREIGN KEY';
+  static const _suffix = 'REFERENCES';
+
+  final List<String> colNames;
+  final String foreignTableName;
+  final List<String> foreignTableColNames;
+  DBForeignKey(
+      {required this.colNames,
+      required this.foreignTableName,
+      this.foreignTableColNames = const []});
+
+  @override
+  String toString() {
+    String str = '$_prefix(${colNames.join(', ')}) $_suffix $foreignTableName';
+    if (foreignTableColNames.isNotEmpty) {
+      str += '(${foreignTableColNames.join(', ')})';
+    }
+    return str;
+  }
+}
+
+class DBCol {
+  final String name;
+  final DBType type;
+
+  DBCol({required this.name, required this.type});
+
+  @override
+  String toString() {
+    return '$name $type';
+  }
+}
+
+class DBCols {
+  late final Map<String, DBCol> cols;
+  late final List<DBForeignKey> foreignKeyGroups;
+  late final List<List<String>> uniqueColsGroups;
+  DBCols(List<DBCol> cols,
+      {this.foreignKeyGroups = const [],
+      List<List<int>> uniqueIndexesGroups = const []}) {
+    this.cols = Map<String, DBCol>.fromIterable(cols, key: (col) => col.name);
+    uniqueColsGroups = uniqueIndexesGroups
+        .map((group) =>
+            group.map((index) => cols[index].name).toList(growable: false))
+        .toList(growable: false);
+  }
+
+  DBCol? operator [](String name) => cols[name];
+
+  @override
+  String toString() {
+    String str = '';
+    str += cols.values.map((field) => field.toString()).join(', ');
+    final foreignKeysStr =
+        foreignKeyGroups.map((group) => group.toString()).join(', ');
+    if (foreignKeysStr.isNotEmpty) {
+      str += ', $foreignKeysStr';
+    }
+    final uniqueColsStr = uniqueColsGroups
+        .map((group) => group.join(', '))
+        .map((groupStr) => 'UNIQUE($groupStr)')
+        .join(', ');
+    if (uniqueColsStr.isNotEmpty) {
+      str += ', $uniqueColsStr';
+    }
+    return str;
   }
 }
 
@@ -78,13 +147,17 @@ class DBHelper {
     dbPath = path.join(dbPath, _dbName);
     // TODO: remove this delete statement in production
     await sql.deleteDatabase(dbPath);
-    return await sql.openDatabase(dbPath, version: _dbVersion);
+    return await sql.openDatabase(dbPath,
+        version: _dbVersion, onConfigure: _onConfigure);
   }
 
-  Future createTable(
-      {required String tableName, required DBFields fields}) async {
+  Future _onConfigure(sql.Database db) async {
+    await db.execute('PRAGMA foreign_keys = ON');
+  }
+
+  Future createTable({required String tableName, required DBCols cols}) async {
     final db = await this.db;
-    String stmt = 'CREATE TABLE IF NOT EXISTS $tableName ($fields);';
+    String stmt = 'CREATE TABLE IF NOT EXISTS $tableName ($cols);';
     await db.execute(stmt);
   }
 }
