@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:kioku/model/base.dart';
 import 'package:kioku/service/database.dart';
 
@@ -83,4 +84,10 @@ class Page {
         PageModel.createTime: createTime.millisecondsSinceEpoch,
         PageModel.lastModifiedTime: lastModifiedTime.millisecondsSinceEpoch,
       };
+
+  @override
+  bool operator ==(Object other) => other is Page && hashCode == other.hashCode;
+
+  @override
+  int get hashCode => const MapEquality().hash(toJson());
 }

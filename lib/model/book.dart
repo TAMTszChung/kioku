@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:kioku/model/base.dart';
 import 'package:kioku/service/database.dart';
@@ -88,4 +89,10 @@ class Book {
         BookModel.createTime: createTime.millisecondsSinceEpoch,
         BookModel.lastModifiedTime: lastModifiedTime.millisecondsSinceEpoch,
       };
+
+  @override
+  bool operator ==(Object other) => other is Book && hashCode == other.hashCode;
+
+  @override
+  int get hashCode => const MapEquality().hash(toJson());
 }
