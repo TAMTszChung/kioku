@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kioku/component/book.dart';
+import 'package:kioku/component/utils/input_dialog.dart';
 import 'package:kioku/model/book.dart';
 import 'package:kioku/provider/book.dart';
 import 'package:provider/provider.dart';
@@ -55,8 +56,21 @@ class _HomeScreenState extends State<HomeScreen> {
           title: Text(widget.title),
           actions: <Widget>[
             IconButton(
-              onPressed: () {
-                provider.insert(Book());
+              onPressed: () async {
+                var result = await showTextInputDialog(context,
+                    title: 'Book Title',
+                    hintText: 'Title',
+                    okText: 'OK',
+                    cancelText: 'Cancel', validator: (text) {
+                  if (text == null || text.isEmpty) {
+                    return "Title cannot be empty";
+                  }
+                  return null;
+                });
+
+                if (result != null) {
+                  provider.insert(Book(title: result));
+                }
               },
               icon: const Icon(Icons.add),
               color: Colors.black,
