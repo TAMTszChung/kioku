@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:kioku/provider/book.dart';
 import 'package:kioku/provider/page.dart';
 import 'package:kioku/screen/book_overview.dart';
+import 'package:kioku/screen/cover_display.dart';
+import 'package:kioku/screen/cover_edit.dart';
 import 'package:kioku/screen/home.dart';
 import 'package:kioku/screen/search.dart';
 import 'package:kioku/screen/share.dart';
@@ -72,6 +74,16 @@ class _AppScreenState extends State<AppScreen> {
   Route? _onGenerateRoute(settings) {
     final args = settings.arguments;
     switch (settings.name) {
+      case '/cover_display':
+        if (args is! int) return null;
+        return MaterialPageRoute(builder: (context) {
+          return CoveDisplayPage(args);
+        });
+      case '/cover_edit':
+        if (args is! int) return null;
+        return MaterialPageRoute(builder: (context) {
+          return CoverEditPage(args);
+        });
       case '/book_overview':
       default:
         if (args is! int) return null;
@@ -103,30 +115,33 @@ class _AppScreenState extends State<AppScreen> {
       tabBuilder: (context, index) {
         switch (index) {
           case 2:
-            return CupertinoTabView(
-                builder: (context) {
-                  return const CupertinoPageScaffold(
-                    child: ShareScreen(),
-                  );
-                },
-                onGenerateRoute: _onGenerateRoute);
+            return SafeArea(
+                child: CupertinoTabView(
+                    builder: (context) {
+                      return const CupertinoPageScaffold(
+                        child: ShareScreen(),
+                      );
+                    },
+                    onGenerateRoute: _onGenerateRoute));
           case 1:
-            return CupertinoTabView(
-                builder: (context) {
-                  return const CupertinoPageScaffold(
-                    child: SearchScreen(),
-                  );
-                },
-                onGenerateRoute: _onGenerateRoute);
+            return SafeArea(
+                child: CupertinoTabView(
+                    builder: (context) {
+                      return const CupertinoPageScaffold(
+                        child: SearchScreen(),
+                      );
+                    },
+                    onGenerateRoute: _onGenerateRoute));
           case 0:
           default:
-            return CupertinoTabView(
-                builder: (context) {
-                  return const CupertinoPageScaffold(
-                    child: HomeScreen(),
-                  );
-                },
-                onGenerateRoute: _onGenerateRoute);
+            return SafeArea(
+                child: CupertinoTabView(
+                    builder: (context) {
+                      return const CupertinoPageScaffold(
+                        child: HomeScreen(),
+                      );
+                    },
+                    onGenerateRoute: _onGenerateRoute));
         }
       },
     );

@@ -44,6 +44,12 @@ class _PromptDialogState extends State<_PromptDialog> {
   String errorText = '';
 
   @override
+  void dispose() {
+    _textFieldController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(widget.title),

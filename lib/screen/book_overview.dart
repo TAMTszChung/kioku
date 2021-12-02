@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:kioku/component/organism/book_cardview.dart';
+import 'package:kioku/component/organism/book_listview.dart';
+import 'package:kioku/component/organism/book_pageview.dart';
 import 'package:kioku/provider/book.dart';
 import 'package:provider/provider.dart';
 
@@ -14,6 +17,18 @@ class BookOverview extends StatefulWidget {
 
 class _BookOverviewState extends State<BookOverview> {
   String _viewMode = 'Book';
+
+  Widget showSubView() {
+    switch (_viewMode) {
+      case 'List':
+        return BookListView(widget.id);
+      case 'Card':
+        return BookCardView(widget.id);
+      case 'Book':
+      default:
+        return BookPageView(widget.id);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,18 +66,14 @@ class _BookOverviewState extends State<BookOverview> {
                 child: Text('Card'),
               ),
               const PopupMenuItem<String>(
-                value: 'Item',
-                child: Text('Item'),
+                value: 'List',
+                child: Text('List'),
               ),
             ],
           )
         ],
       ),
-      body: const Center(
-        child: Text(
-          'Book Overview',
-        ),
-      ),
+      body: showSubView(),
     );
   }
 }
