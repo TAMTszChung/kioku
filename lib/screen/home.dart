@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kioku/component/book.dart';
-import 'package:kioku/component/utils/input_dialog.dart';
+import 'package:kioku/component/atom/input_dialog.dart';
+import 'package:kioku/component/molecule/book.dart';
 import 'package:kioku/model/book.dart';
 import 'package:kioku/provider/book.dart';
 import 'package:provider/provider.dart';
@@ -73,12 +73,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               },
               icon: const Icon(Icons.add),
-              color: Colors.black,
             ),
             PopupMenuButton<String>(
               icon: const Icon(
                 Icons.sort,
-                color: Colors.black,
               ),
               onSelected: (String result) {
                 setState(() {
@@ -132,7 +130,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.all(20),
                       mainAxisSpacing: 40,
                       crossAxisCount: 2,
-                      children: books.map((b) => BookWidget(b)).toList(),
+                      children: books
+                          .map((b) => BookWidget.withRoute(b, '/book_overview'))
+                          .toList(),
                     );
                   } else {
                     return const Center(child: CircularProgressIndicator());

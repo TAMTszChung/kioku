@@ -3,8 +3,12 @@ import 'package:kioku/model/book.dart';
 
 class BookWidget extends StatelessWidget {
   final Book book;
+  final String? routeName;
 
-  const BookWidget(this.book, {Key? key}) : super(key: key);
+  const BookWidget(this.book, {this.routeName, Key? key}) : super(key: key);
+
+  const BookWidget.withRoute(Book book, String routeName, {Key? key})
+      : this(book, routeName: routeName, key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +20,12 @@ class BookWidget extends StatelessWidget {
           aspectRatio: 210 / 297,
           child: GestureDetector(
             onTap: () {
+              if (routeName == null) {
+                return;
+              }
               Navigator.pushNamed(
                 context,
-                '/book_overview',
+                routeName!,
                 arguments: book.id,
               );
             },
