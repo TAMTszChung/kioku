@@ -1,9 +1,10 @@
 import 'dart:convert';
-import 'dart:io' as io;
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import "package:images_picker/images_picker.dart";
+import 'package:kioku/component/molecule/book.dart';
+import 'package:kioku/component/molecule/custom_image_picker.dart';
 import 'package:kioku/model/book.dart';
 import 'package:kioku/provider/book.dart';
 import 'package:provider/provider.dart';
@@ -18,18 +19,16 @@ class CoverEditPage extends StatefulWidget {
 }
 
 class _CoverEditPageState extends State<CoverEditPage> {
-  late Book localBookCopy;
+  late Book book;
   late String title;
   late Color color;
   String? cover;
+  bool saving = false;
 
   @override
   initState() {
     super.initState();
-    localBookCopy = context.read<BookProvider>().get(widget.id);
-    title = localBookCopy.title;
-    color = localBookCopy.color;
-    cover = localBookCopy.cover;
+    book = context.read<BookProvider>().get(widget.id).copy();
   }
 
   @override
@@ -39,11 +38,14 @@ class _CoverEditPageState extends State<CoverEditPage> {
         appBar: AppBar(
           title: const Text('Edit Cover'),
           actions: <Widget>[
-            TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text("Save"))
+            saving
+                ? const CircularProgressIndicator()
+                : TextButton(
+                    onPressed: () async {
+                      await context.read<BookProvider>().update(book);
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Save"))
           ],
         ),
         body: ListView(
@@ -56,15 +58,17 @@ class _CoverEditPageState extends State<CoverEditPage> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
               ),
             ),
-            TextField(
+            TextFormField(
+              initialValue: book.title,
               decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: 'Please enter a title',
                   helperText: 'maximum length: 30',
                   contentPadding: EdgeInsets.fromLTRB(12, 5, 12, 5)),
               onChanged: (text) {
+                book.title = text;
                 setState(() {
-                  title = text;
+                  book = book;
                 });
               },
             ),
@@ -75,34 +79,37 @@ class _CoverEditPageState extends State<CoverEditPage> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
               ),
             ),
-            TextButton(
+            ElevatedButton(
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.all(16.0),
                 primary: Colors.black,
-                backgroundColor: color,
+                backgroundColor: book.color,
                 textStyle: const TextStyle(fontSize: 20),
               ),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      content: SingleChildScrollView(
-                        child: HueRingPicker(
-                          pickerColor: color,
-                          onColorChanged: (Color newColor) {
-                            setState(() {
-                              color = newColor;
-                            });
-                          },
-                          enableAlpha: false,
-                          displayThumbColor: true,
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
+              onPressed: book.cover != null
+                  ? null
+                  : () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            content: SingleChildScrollView(
+                              child: HueRingPicker(
+                                pickerColor: book.color,
+                                onColorChanged: (Color newColor) {
+                                  book.color = newColor;
+                                  setState(() {
+                                    book = book;
+                                  });
+                                },
+                                enableAlpha: false,
+                                displayThumbColor: true,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
               child: const Text(''),
             ),
             const Padding(
@@ -114,19 +121,49 @@ class _CoverEditPageState extends State<CoverEditPage> {
             ),
             OutlinedButton(
               onPressed: () async {
-                List<Media>? res = await ImagesPicker.pick(
-                  count: 1,
-                  pickType: PickType.image,
-                );
+                final File? res = await CustomImagePicker.pickMedia(
+                    isGallery: true, fixRatio: true);
                 if (res == null) return;
-                final imageBytes = await io.File(res.first.path).readAsBytes();
-                String base64Image = base64Encode(imageBytes);
+                final imageBytes = await File(res.path).readAsBytes();
+                book.cover = base64Encode(imageBytes);
                 setState(() {
-                  cover = base64Image;
+                  book = book;
                 });
               },
-              child: const Text('Choose an image'),
+              child: const Text('Pick an image'),
             ),
+            OutlinedButton(
+              onPressed: () async {
+                final File? res = await CustomImagePicker.pickMedia(
+                    isGallery: false, fixRatio: true);
+                if (res == null) return;
+                final imageBytes = await File(res.path).readAsBytes();
+                book.cover = base64Encode(imageBytes);
+                setState(() {
+                  book = book;
+                });
+              },
+              child: const Text('Take a photo'),
+            ),
+            OutlinedButton(
+              onPressed: book.cover != null
+                  ? () {
+                      book.cover = null;
+                      setState(() {
+                        book = book;
+                      });
+                    }
+                  : null,
+              child: const Text('Clear'),
+            ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(0, 30, 0, 5),
+              child: Text(
+                'Preview',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+              ),
+            ),
+            BookWidget(book),
           ],
         ));
   }

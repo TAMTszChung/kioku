@@ -54,6 +54,7 @@ class BookProvider extends DataProvider {
       throw ArgumentError('id property cannot be null', 'bookToUpdate');
     }
     data.remove(BookModel.id);
+    data[BookModel.lastModifiedTime] = DateTime.now().millisecondsSinceEpoch;
     final count = await db
         .update(tableName, data, where: '${BookModel.id} = ?', whereArgs: [id]);
     if (count != 1) throw Exception('Cannot update book with id $id');

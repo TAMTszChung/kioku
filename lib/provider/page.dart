@@ -71,6 +71,7 @@ class PageProvider extends DataProvider {
       throw ArgumentError('id property cannot be null', 'pageToUpdate');
     }
     data.remove(PageModel.id);
+    data[PageModel.lastModifiedTime] = DateTime.now().millisecondsSinceEpoch;
     final count = await db
         .update(tableName, data, where: '${PageModel.id} = ?', whereArgs: [id]);
     if (count != 1) throw Exception('Cannot update page with id $id');

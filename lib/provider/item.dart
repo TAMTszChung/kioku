@@ -60,6 +60,7 @@ class ItemProvider extends DataProvider {
       throw ArgumentError('id property cannot be null', 'itemToUpdate');
     }
     data.remove(ItemModel.id);
+    data[ItemModel.lastModifiedTime] = DateTime.now().millisecondsSinceEpoch;
     final count = await db
         .update(tableName, data, where: '${ItemModel.id} = ?', whereArgs: [id]);
     if (count != 1) throw Exception('Cannot update item with id $id');

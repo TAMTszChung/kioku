@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:kioku/model/book.dart';
 
@@ -12,8 +14,6 @@ class BookWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var deviceData = MediaQuery.of(context);
-
     return Center(
       child: AspectRatio(
         aspectRatio: 210 / 297,
@@ -30,7 +30,13 @@ class BookWidget extends StatelessWidget {
           },
           child: Container(
             decoration: BoxDecoration(
-              color: book.color,
+              color: book.cover == null ? book.color : null,
+              image: book.cover != null
+                  ? DecorationImage(
+                      image: MemoryImage(base64Decode(book.cover!)),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
               borderRadius: BorderRadius.circular(15),
             ),
             padding: const EdgeInsets.symmetric(vertical: 15),

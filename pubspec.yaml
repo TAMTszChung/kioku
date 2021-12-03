@@ -39,7 +39,8 @@ dependencies:
   collection: ^1.15.0
   extension: ^0.2.0
   flutter_colorpicker: ^1.0.2
-  images_picker: ^1.2.8
+  image_picker: ^0.8.4+4
+  image_cropper: ^1.4.1
 
 dev_dependencies:
   flutter_test:
