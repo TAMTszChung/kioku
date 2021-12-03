@@ -12,7 +12,7 @@ class BookCardView extends StatelessWidget {
     final provider = context.watch<BookProvider>();
     final book = provider.get(id);
 
-    List<Widget> widgets = [
+    const List<Widget> widgets = [
       Center(
         child: Text("Card"),
       ),

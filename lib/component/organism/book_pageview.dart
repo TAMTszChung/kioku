@@ -7,6 +7,8 @@ import 'package:kioku/provider/book_page.dart';
 import 'package:provider/provider.dart';
 
 class BookPageView extends StatelessWidget {
+  static const slideshowRoute = '/book_slideshow';
+
   final int id;
 
   const BookPageView(this.id, {Key? key}) : super(key: key);
@@ -20,14 +22,13 @@ class BookPageView extends StatelessWidget {
         context.select<BookPageProvider, List<BookPage>>(
             (BookPageProvider p) => p.getAllByBookId(id));
 
-    print(pages);
-    List<Widget> widgets = [
+    final List<Widget> widgets = [
       Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 20),
           child: SizedBox(
             height: deviceData.size.width,
-            child: BookWidget.withRoute(book, '/cover_display'),
+            child: BookWidget.withRoute(book, slideshowRoute),
           ),
         ),
       ),
@@ -36,7 +37,7 @@ class BookPageView extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 20),
               child: SizedBox(
                 height: deviceData.size.width,
-                child: BookPageWidget(page),
+                child: BookPageWidget.withRoute(page, slideshowRoute),
               ),
             ),
           )))

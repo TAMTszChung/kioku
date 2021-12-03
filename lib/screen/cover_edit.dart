@@ -20,9 +20,6 @@ class CoverEditPage extends StatefulWidget {
 
 class _CoverEditPageState extends State<CoverEditPage> {
   late Book book;
-  late String title;
-  late Color color;
-  String? cover;
   bool saving = false;
 
   @override
@@ -49,7 +46,7 @@ class _CoverEditPageState extends State<CoverEditPage> {
           ],
         ),
         body: ListView(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           children: [
             const Padding(
               padding: EdgeInsets.only(bottom: 5),

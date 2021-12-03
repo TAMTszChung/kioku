@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:kioku/model/book.dart';
 import 'package:kioku/model/book_page.dart';
 import 'package:kioku/provider/book.dart';
@@ -113,6 +114,9 @@ class BookPageProvider extends DataProvider {
   }
 
   List<BookPage> getAllByBookId(int bookId) {
-    return _pages.where((page) => page.bookId == bookId).toList();
+    return _pages
+        .where((page) => page.bookId == bookId)
+        .toList()
+        .sortedBy<num>((page) => page.pageNumber);
   }
 }

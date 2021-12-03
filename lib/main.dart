@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:kioku/provider/book.dart';
 import 'package:kioku/provider/book_page.dart';
 import 'package:kioku/screen/book_overview.dart';
-import 'package:kioku/screen/cover_display.dart';
+import 'package:kioku/screen/book_slideshow.dart';
 import 'package:kioku/screen/cover_edit.dart';
 import 'package:kioku/screen/home.dart';
 import 'package:kioku/screen/search.dart';
@@ -75,16 +75,18 @@ class _AppScreenState extends State<AppScreen> {
   Route? _onGenerateRoute(settings) {
     final args = settings.arguments;
     switch (settings.name) {
-      case '/cover_display':
-        if (args is! int) return null;
+      case '/book_slideshow':
+        if (args is! int && args is! Iterable<int>) return null;
         return MaterialPageRoute(builder: (context) {
-          return CoveDisplayPage(args);
+          return BookSlideshowPage(args);
         });
       case '/cover_edit':
         if (args is! int) return null;
         return MaterialPageRoute(builder: (context) {
           return CoverEditPage(args);
         });
+      case '/page_edit':
+      // TODO
       case '/book_overview':
       default:
         if (args is! int) return null;

@@ -25,7 +25,7 @@ class BookPageWidget extends StatelessWidget {
             Navigator.pushNamed(
               context,
               routeName!,
-              arguments: page.id,
+              arguments: [page.bookId, page.id],
             );
           },
           child: Container(

@@ -26,6 +26,19 @@ class BookModel extends BaseModel {
 }
 
 class Book {
+  static final colors = [
+    Colors.blueGrey.shade800,
+    Colors.indigo,
+    Colors.cyan.shade700,
+    Colors.lightBlueAccent.shade400,
+    Colors.lightGreenAccent,
+    Colors.limeAccent,
+    Colors.yellow,
+    Colors.orange,
+    Colors.brown,
+    Colors.red.shade800
+  ];
+
   int? id; // id from database
   String title; // title
   Color color; // color of cover
@@ -41,8 +54,10 @@ class Book {
       required this.createTime,
       required this.lastModifiedTime});
 
-  factory Book({String title = 'Untitled', Color color = Colors.grey}) {
+  factory Book({String title = 'Untitled', Color? color}) {
     final timestamp = DateTime.now();
+    colors.shuffle();
+    color ??= colors.first;
     return Book._internal(
         title: title,
         color: color,

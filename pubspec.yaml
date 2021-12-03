@@ -41,6 +41,7 @@ dependencies:
   flutter_colorpicker: ^1.0.2
   image_picker: ^0.8.4+4
   image_cropper: ^1.4.1
+  carousel_slider: ^4.0.0
 
 dev_dependencies:
   flutter_test:
