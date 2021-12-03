@@ -31,7 +31,6 @@ class _CoverEditPageState extends State<CoverEditPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        //backgroundColor: Colors.black,
         appBar: AppBar(
           title: const Text('Edit Cover'),
           actions: <Widget>[
@@ -42,7 +41,7 @@ class _CoverEditPageState extends State<CoverEditPage> {
                       await context.read<BookProvider>().update(book);
                       Navigator.pop(context);
                     },
-                    child: const Text("Save"))
+                    child: const Text('Save'))
           ],
         ),
         body: ListView(

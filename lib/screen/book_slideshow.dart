@@ -27,20 +27,18 @@ class BookSlideshowPage extends StatefulWidget {
   }
 
   @override
-  State<StatefulWidget> createState() => BookSlideShowState();
+  State<StatefulWidget> createState() => _BookSlideShowState();
 }
 
-class BookSlideShowState extends State<BookSlideshowPage> {
+class _BookSlideShowState extends State<BookSlideshowPage> {
   static const coverEditRoute = '/cover_edit';
   static const pageEditRoute = '/page_edit';
 
-  late Book book;
   BookPage? page;
 
   @override
   initState() {
     super.initState();
-    book = context.read<BookProvider>().get(widget.bookId);
     if (widget.initialPageId != null) {
       page = context.read<BookPageProvider>().get(widget.initialPageId);
     }
@@ -48,24 +46,25 @@ class BookSlideShowState extends State<BookSlideshowPage> {
 
   @override
   Widget build(BuildContext context) {
+    final book =
+        context.select<BookProvider, Book>((p) => p.get(widget.bookId));
     final pages = context.select<BookPageProvider, List<BookPage>>(
         (p) => p.getAllByBookId(widget.bookId));
 
     return Scaffold(
-        //backgroundColor: Colors.black,
         appBar: AppBar(
-          title: Text(page == null
-              ? 'Cover'
-              : 'Page ${page!.pageNumber}/${pages.length}'),
+          title: Text(page != null
+              ? 'Page ${page!.pageNumber}/${pages.length}'
+              : 'Cover'),
           actions: <Widget>[
             TextButton(
                 onPressed: () {
-                  if (page == null) {
-                    Navigator.pushNamed(context, coverEditRoute,
-                        arguments: widget.bookId);
-                  } else {
+                  if (page != null) {
                     Navigator.pushNamed(context, pageEditRoute,
                         arguments: page!.id);
+                  } else {
+                    Navigator.pushNamed(context, coverEditRoute,
+                        arguments: widget.bookId);
                   }
                 },
                 child: const Text("Edit"))
@@ -75,10 +74,10 @@ class BookSlideShowState extends State<BookSlideshowPage> {
             itemCount: pages.length + 1,
             itemBuilder: (_, __, index) {
               late final Widget widget;
-              if (index <= 0) {
-                widget = BookWidget(book);
-              } else {
+              if (index > 0) {
                 widget = BookPageWidget(pages[index - 1]);
+              } else {
+                widget = BookWidget(book);
               }
               return Padding(
                   padding: const EdgeInsets.all(5),
@@ -88,6 +87,7 @@ class BookSlideShowState extends State<BookSlideshowPage> {
                 height: MediaQuery.of(context).size.height,
                 viewportFraction: 1.0,
                 enableInfiniteScroll: false,
+                initialPage: (page != null) ? page!.pageNumber : 0,
                 onPageChanged: (index, _) {
                   setState(() {
                     page = (index > 0) ? pages[index - 1] : null;
