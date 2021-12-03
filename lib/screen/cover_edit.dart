@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -120,8 +119,7 @@ class _CoverEditPageState extends State<CoverEditPage> {
                 final File? res = await CustomImagePicker.pickMedia(
                     isGallery: true, fixRatio: true);
                 if (res == null) return;
-                final imageBytes = await File(res.path).readAsBytes();
-                book.cover = base64Encode(imageBytes);
+                book.cover = await File(res.path).readAsBytes();
                 setState(() {
                   book = book;
                 });
@@ -133,8 +131,7 @@ class _CoverEditPageState extends State<CoverEditPage> {
                 final File? res = await CustomImagePicker.pickMedia(
                     isGallery: false, fixRatio: true);
                 if (res == null) return;
-                final imageBytes = await File(res.path).readAsBytes();
-                book.cover = base64Encode(imageBytes);
+                book.cover = await File(res.path).readAsBytes();
                 setState(() {
                   book = book;
                 });

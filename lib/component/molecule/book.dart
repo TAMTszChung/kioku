@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:kioku/model/book.dart';
 
@@ -33,7 +31,7 @@ class BookWidget extends StatelessWidget {
               color: book.cover == null ? book.color : null,
               image: book.cover != null
                   ? DecorationImage(
-                      image: MemoryImage(base64Decode(book.cover!)),
+                      image: MemoryImage(book.cover!),
                       fit: BoxFit.cover,
                     )
                   : null,

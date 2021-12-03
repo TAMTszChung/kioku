@@ -119,4 +119,43 @@ class BookPageProvider extends DataProvider {
         .toList()
         .sortedBy<num>((page) => page.pageNumber);
   }
+
+  Future<List<BookPage>> setAll(List<BookPage> listToSet) async {
+    final db = await DBHelper.instance.db;
+    final batch = db.batch();
+    final pagesToUpdate = listToSet.where((page) {
+      if (page.id == null) return false;
+      final oldPage = _pages.singleWhere((oldPage) => oldPage.id == page.id);
+      return page != oldPage;
+    });
+    for (var page in pagesToUpdate) {
+      final data = page.toJson();
+      final id = data[BookPageModel.id] as int;
+      data.remove(BookPageModel.id);
+      data[BookPageModel.lastModifiedTime] =
+          DateTime.now().millisecondsSinceEpoch;
+      batch.update(tableName, data,
+          where: '${BookPageModel.id} = ?', whereArgs: [id]);
+    }
+    final pagesToInsert = listToSet
+        .where((page) => page.id == null)
+        .sortedBy<DateTime>((page) => page.lastModifiedTime);
+    for (var page in pagesToInsert) {
+      final data = page.toJson();
+      final pageNumber = data[BookPageModel.pageNumber] as int?;
+      if (pageNumber == null || pageNumber < 1) {
+        // IMPORTANT: for each bookId, there must be at most 1 page with id null
+        final bookId = data[BookPageModel.bookId] as int;
+        final numPages = _pages.where((page) => page.bookId == bookId).length;
+        data[BookPageModel.pageNumber] = numPages + 1;
+      }
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      data[BookPageModel.lastModifiedTime] = timestamp;
+      data[BookPageModel.createTime] = timestamp;
+      batch.insert(tableName, data);
+    }
+    await batch.commit(continueOnError: true, noResult: true);
+    await fetchAll();
+    return pages;
+  }
 }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:extension/extension.dart';
@@ -19,6 +20,7 @@ class PageItemModel extends BaseModel {
   static const width = 'width_percent';
   static const height = 'height_percent';
   static const rotation = 'rotation_rad';
+  static const zIndex = 'z_index';
   static const datetime = 'datetime';
   static const createTime = 'createTime';
   static const lastModifiedTime = 'lastModifiedTime';
@@ -38,6 +40,7 @@ class PageItemModel extends BaseModel {
           DBCol(name: width, type: DBType.real(notNull: true)),
           DBCol(name: height, type: DBType.real(notNull: true)),
           DBCol(name: rotation, type: DBType.real(notNull: true)),
+          DBCol(name: zIndex, type: DBType.int(notNull: true)),
           DBCol(name: datetime, type: DBType.int()),
           DBCol(name: createTime, type: DBType.int(notNull: true)),
           DBCol(name: lastModifiedTime, type: DBType.int(notNull: true)),
@@ -63,13 +66,14 @@ class PageItem {
   int pageId; // id of page owning this item
   String? name; // name
   PageItemType type; // type
-  String data; // data
+  Uint8List data; // data in bytes
   Map<String, String>? attributes; // attributes of data
   List<String>? categories; // categories
   Point<double> coordinates; // coordinates (x, y are in percent)
   double width; // width (in percent)
   double height; // height (in percent)
   double rotation; // rotation (in radian)
+  int zIndex; // z-index (larger = closer to surface)
   DateTime? datetime; // datetime
   final DateTime createTime; // create time from database
   DateTime lastModifiedTime; // last modified time from database
@@ -86,6 +90,7 @@ class PageItem {
       required this.width,
       required this.height,
       required this.rotation,
+      required this.zIndex,
       this.datetime,
       required this.createTime,
       required this.lastModifiedTime});
@@ -94,11 +99,12 @@ class PageItem {
       {required int pageId,
       String? name,
       required PageItemType type,
-      String data = '',
+      required Uint8List data,
       Point<double> coordinates = const Point<double>(0.0, 0.0),
       required double width,
       required double height,
       double rotation = 0.0,
+      required int zIndex,
       DateTime? datetime}) {
     final timestamp = DateTime.now();
     return PageItem._internal(
@@ -110,6 +116,7 @@ class PageItem {
         width: width,
         height: height,
         rotation: rotation,
+        zIndex: zIndex,
         datetime: datetime,
         createTime: timestamp,
         lastModifiedTime: timestamp);
@@ -133,7 +140,7 @@ class PageItem {
         pageId: json[PageItemModel.pageId] as int,
         name: json[PageItemModel.name] as String?,
         type: json[PageItemModel.type] as PageItemType,
-        data: json[PageItemModel.data] as String,
+        data: json[PageItemModel.data] as Uint8List,
         attributes: attributes,
         categories: categories,
         coordinates: Point<double>(json[PageItemModel.coordinateX] as double,
@@ -141,6 +148,7 @@ class PageItem {
         width: json[PageItemModel.width] as double,
         height: json[PageItemModel.height] as double,
         rotation: json[PageItemModel.rotation] as double,
+        zIndex: json[PageItemModel.zIndex] as int,
         datetime: DateTime.fromMillisecondsSinceEpoch(
             json[PageItemModel.datetime] as int),
         createTime: DateTime.fromMillisecondsSinceEpoch(
@@ -154,13 +162,14 @@ class PageItem {
     int? pageId,
     String? name,
     PageItemType? type,
-    String? data,
+    Uint8List? data,
     Map<String, String>? attributes,
     List<String>? categories,
     Point<double>? coordinates,
     double? width,
     double? height,
     double? rotation,
+    int? zIndex,
     DateTime? createTime,
     DateTime? lastModifiedTime,
     required PageItem original,
@@ -177,6 +186,7 @@ class PageItem {
         width: width ?? original.width,
         height: height ?? original.height,
         rotation: rotation ?? original.rotation,
+        zIndex: zIndex ?? original.zIndex,
         createTime: createTime ?? original.createTime,
         lastModifiedTime: lastModifiedTime ?? original.lastModifiedTime);
   }
@@ -185,13 +195,14 @@ class PageItem {
     int? pageId,
     String? name,
     PageItemType? type,
-    String? data,
+    Uint8List? data,
     Map<String, String>? attributes,
     List<String>? categories,
     Point<double>? coordinates,
     double? width,
     double? height,
     double? rotation,
+    int? zIndex,
     DateTime? lastModifiedTime,
   }) {
     return PageItem._copy(
@@ -205,6 +216,7 @@ class PageItem {
         width: width,
         height: height,
         rotation: rotation,
+        zIndex: zIndex,
         lastModifiedTime: lastModifiedTime,
         original: this);
   }
@@ -223,6 +235,7 @@ class PageItem {
         PageItemModel.width: width,
         PageItemModel.height: height,
         PageItemModel.rotation: rotation,
+        PageItemModel.zIndex: zIndex,
         PageItemModel.createTime: createTime.millisecondsSinceEpoch,
         PageItemModel.lastModifiedTime: lastModifiedTime.millisecondsSinceEpoch,
       };

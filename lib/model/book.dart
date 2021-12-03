@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
@@ -42,7 +43,7 @@ class Book {
   int? id; // id from database
   String title; // title
   Color color; // color of cover
-  String? cover; // image of cover in base64
+  Uint8List? cover; // image of cover in bytes
   final DateTime createTime; // create time from database
   DateTime lastModifiedTime; // last modified time from database
 
@@ -70,7 +71,7 @@ class Book {
         id: json[BookModel.id] as int,
         title: json[BookModel.title] as String,
         color: Color(json[BookModel.color] as int),
-        cover: json[BookModel.cover] as String?,
+        cover: json[BookModel.cover] as Uint8List?,
         createTime: DateTime.fromMillisecondsSinceEpoch(
             json[BookModel.createTime] as int),
         lastModifiedTime: DateTime.fromMillisecondsSinceEpoch(
@@ -81,7 +82,7 @@ class Book {
     int? id,
     String? title,
     Color? color,
-    String? cover,
+    Uint8List? cover,
     DateTime? createTime,
     DateTime? lastModifiedTime,
     required Book original,
@@ -98,7 +99,7 @@ class Book {
   Book copy({
     String? title,
     Color? color,
-    String? cover,
+    Uint8List? cover,
     DateTime? lastModifiedTime,
   }) {
     return Book._copy(

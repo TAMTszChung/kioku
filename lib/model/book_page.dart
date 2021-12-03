@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:collection/collection.dart';
 import 'package:kioku/model/base.dart';
 import 'package:kioku/service/database.dart';
@@ -33,7 +35,7 @@ class BookPage {
   int? id; // id from database
   int bookId; // id of book owning this page
   int pageNumber; // page number in the book
-  String? thumbnail; // thumbnail (snapshot) of the items
+  Uint8List? thumbnail; // thumbnail (snapshot) of the items in bytes
   final DateTime createTime; // create time from database
   DateTime lastModifiedTime; // last modified time from database
 
@@ -59,7 +61,7 @@ class BookPage {
         id: json[BookPageModel.id] as int,
         bookId: json[BookPageModel.bookId] as int,
         pageNumber: json[BookPageModel.pageNumber] as int,
-        thumbnail: json[BookPageModel.thumbnail] as String?,
+        thumbnail: json[BookPageModel.thumbnail] as Uint8List?,
         createTime: DateTime.fromMillisecondsSinceEpoch(
             json[BookPageModel.createTime] as int),
         lastModifiedTime: DateTime.fromMillisecondsSinceEpoch(
@@ -70,7 +72,7 @@ class BookPage {
     int? id,
     int? bookId,
     int? pageNumber,
-    String? thumbnail,
+    Uint8List? thumbnail,
     DateTime? createTime,
     DateTime? lastModifiedTime,
     required BookPage original,
@@ -87,7 +89,7 @@ class BookPage {
   BookPage copy({
     int? bookId,
     int? pageNumber,
-    String? thumbnail,
+    Uint8List? thumbnail,
     DateTime? lastModifiedTime,
   }) {
     return BookPage._copy(

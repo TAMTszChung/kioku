@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:kioku/model/book_page.dart';
 import 'package:kioku/model/page_item.dart';
 import 'package:kioku/provider/book_page.dart';
@@ -80,5 +81,51 @@ class PageItemProvider extends DataProvider {
 
   PageItem get(int id) {
     return _items.singleWhere((page) => page.id == id);
+  }
+
+  List<PageItem> getAllByPageId(int pageId) {
+    return _items
+        .where((item) => item.pageId == pageId)
+        .toList()
+        .sortedBy<num>((item) => item.zIndex);
+  }
+
+  Future<List<PageItem>> setAll(List<PageItem> listToSet) async {
+    final db = await DBHelper.instance.db;
+    final batch = db.batch();
+    final itemsToUpdate = listToSet.where((item) {
+      if (item.id == null) return false;
+      final oldItem = _items.singleWhere((oldItem) => oldItem.id == item.id);
+      return item != oldItem;
+    });
+    for (var item in itemsToUpdate) {
+      final data = item.toJson();
+      final id = data[PageItemModel.id] as int;
+      data.remove(PageItemModel.id);
+      data[PageItemModel.lastModifiedTime] =
+          DateTime.now().millisecondsSinceEpoch;
+      batch.update(tableName, data,
+          where: '${PageItemModel.id} = ?', whereArgs: [id]);
+    }
+    final itemsToInsert = listToSet
+        .where((item) => item.id == null)
+        .sortedBy<DateTime>((item) => item.lastModifiedTime);
+    for (var item in itemsToInsert) {
+      final data = item.toJson();
+      final zIndex = data[PageItemModel.zIndex] as int;
+      if (zIndex < 0) {
+        // IMPORTANT: for each pageId, there must be at most 1 item with id null
+        final pageId = data[PageItemModel.pageId] as int;
+        final numItems = _items.where((item) => item.pageId == pageId).length;
+        data[PageItemModel.zIndex] = numItems + 1;
+      }
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      data[PageItemModel.lastModifiedTime] = timestamp;
+      data[PageItemModel.createTime] = timestamp;
+      batch.insert(tableName, data);
+    }
+    await batch.commit(continueOnError: true, noResult: true);
+    await fetchAll();
+    return items;
   }
 }

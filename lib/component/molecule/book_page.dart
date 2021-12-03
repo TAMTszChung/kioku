@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:kioku/model/book_page.dart';
 
@@ -33,7 +31,7 @@ class BookPageWidget extends StatelessWidget {
                 color: page.thumbnail == null ? Colors.white : null,
                 image: page.thumbnail != null
                     ? DecorationImage(
-                        image: MemoryImage(base64Decode(page.thumbnail!)),
+                        image: MemoryImage(page.thumbnail!),
                         fit: BoxFit.cover,
                       )
                     : null,
