@@ -114,21 +114,13 @@ class _CoverEditPageState extends State<CoverEditPage> {
             ),
             OutlinedButton(
               onPressed: () async {
-                print('called');
-
                 List<Media>? res = await ImagesPicker.pick(
                   count: 1,
                   pickType: PickType.image,
                 );
-
-                print(res.toString());
-                if (res == null) {
-                  return;
-                }
-                final imageBytes = io.File(res[0].path).readAsBytesSync();
+                if (res == null) return;
+                final imageBytes = await io.File(res.first.path).readAsBytes();
                 String base64Image = base64Encode(imageBytes);
-                print(base64Image);
-
                 setState(() {
                   cover = base64Image;
                 });
