@@ -57,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: <Widget>[
             IconButton(
               onPressed: () async {
-                var result = await showTextInputDialog(context,
+                final result = await showTextInputDialog(context,
                     title: 'Book Title',
                     hintText: 'Title',
                     okText: 'OK',

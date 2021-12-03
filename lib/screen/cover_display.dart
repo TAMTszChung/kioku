@@ -11,7 +11,7 @@ class CoveDisplayPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var book =
+    final book =
         context.select<BookProvider, Book>((BookProvider p) => p.get(id));
 
     return Scaffold(

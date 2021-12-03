@@ -6,7 +6,7 @@ import 'package:extension/extension.dart';
 import 'package:kioku/model/base.dart';
 import 'package:kioku/service/database.dart';
 
-class ItemModel extends BaseModel {
+class PageItemModel extends BaseModel {
   static const id = 'id';
   static const pageId = 'page_id';
   static const name = 'name';
@@ -23,7 +23,7 @@ class ItemModel extends BaseModel {
   static const createTime = 'createTime';
   static const lastModifiedTime = 'lastModifiedTime';
 
-  ItemModel({required String pageTableName, required DBCol pageTableIdCol})
+  PageItemModel({required String pageTableName, required DBCol pageTableIdCol})
       : super(
             cols: DBCols([
           DBCol(name: id, type: DBType.rowId()),
@@ -49,20 +49,20 @@ class ItemModel extends BaseModel {
         ]));
 }
 
-class ItemType extends Enum<String> {
-  const ItemType(String value) : super(value);
+class PageItemType extends Enum<String> {
+  const PageItemType(String value) : super(value);
 
   // ignore: constant_identifier_names
-  static const ItemType TEXTBOX = ItemType('textbox');
+  static const PageItemType TEXTBOX = PageItemType('textbox');
   // ignore: constant_identifier_names
-  static const ItemType IMAGE = ItemType('image');
+  static const PageItemType IMAGE = PageItemType('image');
 }
 
-class Item {
+class PageItem {
   int? id; // id from database
   int pageId; // id of page owning this item
   String? name; // name
-  ItemType type; // type
+  PageItemType type; // type
   String data; // data
   Map<String, String>? attributes; // attributes of data
   List<String>? categories; // categories
@@ -74,7 +74,7 @@ class Item {
   final DateTime createTime; // create time from database
   DateTime lastModifiedTime; // last modified time from database
 
-  Item._internal(
+  PageItem._internal(
       {this.id,
       required this.pageId,
       this.name,
@@ -90,10 +90,10 @@ class Item {
       required this.createTime,
       required this.lastModifiedTime});
 
-  factory Item(
+  factory PageItem(
       {required int pageId,
       String? name,
-      required ItemType type,
+      required PageItemType type,
       String data = '',
       Point<double> coordinates = const Point<double>(0.0, 0.0),
       required double width,
@@ -101,7 +101,7 @@ class Item {
       double rotation = 0.0,
       DateTime? datetime}) {
     final timestamp = DateTime.now();
-    return Item._internal(
+    return PageItem._internal(
         pageId: pageId,
         name: name,
         type: type,
@@ -115,45 +115,45 @@ class Item {
         lastModifiedTime: timestamp);
   }
 
-  factory Item.fromJson(Map<String, Object?> json) {
+  factory PageItem.fromJson(Map<String, Object?> json) {
     Map<String, String>? attributes;
-    var attributesStr = json[ItemModel.attributes] as String?;
+    final attributesStr = json[PageItemModel.attributes] as String?;
     if (attributesStr != null) {
       attributes = jsonDecode(attributesStr, reviver: (key, value) {
         return value is String ? value : value.toString();
       });
     }
     List<String>? categories;
-    var categoriesStr = json[ItemModel.categories] as String?;
+    final categoriesStr = json[PageItemModel.categories] as String?;
     if (categoriesStr != null) {
       categories = categoriesStr.split(',');
     }
-    return Item._internal(
-        id: json[ItemModel.id] as int,
-        pageId: json[ItemModel.pageId] as int,
-        name: json[ItemModel.name] as String?,
-        type: json[ItemModel.type] as ItemType,
-        data: json[ItemModel.data] as String,
+    return PageItem._internal(
+        id: json[PageItemModel.id] as int,
+        pageId: json[PageItemModel.pageId] as int,
+        name: json[PageItemModel.name] as String?,
+        type: json[PageItemModel.type] as PageItemType,
+        data: json[PageItemModel.data] as String,
         attributes: attributes,
         categories: categories,
-        coordinates: Point<double>(json[ItemModel.coordinateX] as double,
-            json[ItemModel.coordinateY] as double),
-        width: json[ItemModel.width] as double,
-        height: json[ItemModel.height] as double,
-        rotation: json[ItemModel.rotation] as double,
+        coordinates: Point<double>(json[PageItemModel.coordinateX] as double,
+            json[PageItemModel.coordinateY] as double),
+        width: json[PageItemModel.width] as double,
+        height: json[PageItemModel.height] as double,
+        rotation: json[PageItemModel.rotation] as double,
         datetime: DateTime.fromMillisecondsSinceEpoch(
-            json[ItemModel.datetime] as int),
+            json[PageItemModel.datetime] as int),
         createTime: DateTime.fromMillisecondsSinceEpoch(
-            json[ItemModel.createTime] as int),
+            json[PageItemModel.createTime] as int),
         lastModifiedTime: DateTime.fromMillisecondsSinceEpoch(
-            json[ItemModel.lastModifiedTime] as int));
+            json[PageItemModel.lastModifiedTime] as int));
   }
 
-  factory Item._copy({
+  factory PageItem._copy({
     int? id,
     int? pageId,
     String? name,
-    ItemType? type,
+    PageItemType? type,
     String? data,
     Map<String, String>? attributes,
     List<String>? categories,
@@ -163,9 +163,9 @@ class Item {
     double? rotation,
     DateTime? createTime,
     DateTime? lastModifiedTime,
-    required Item original,
+    required PageItem original,
   }) {
-    return Item._internal(
+    return PageItem._internal(
         id: id ?? original.id,
         pageId: pageId ?? original.pageId,
         name: name ?? original.name,
@@ -181,10 +181,10 @@ class Item {
         lastModifiedTime: lastModifiedTime ?? original.lastModifiedTime);
   }
 
-  Item copy({
+  PageItem copy({
     int? pageId,
     String? name,
-    ItemType? type,
+    PageItemType? type,
     String? data,
     Map<String, String>? attributes,
     List<String>? categories,
@@ -194,7 +194,7 @@ class Item {
     double? rotation,
     DateTime? lastModifiedTime,
   }) {
-    return Item._copy(
+    return PageItem._copy(
         pageId: pageId,
         name: name,
         type: type,
@@ -210,25 +210,26 @@ class Item {
   }
 
   Map<String, Object?> toJson() => {
-        ItemModel.id: id,
-        ItemModel.pageId: pageId,
-        ItemModel.name: name,
-        ItemModel.type: type,
-        ItemModel.data: data,
-        ItemModel.attributes:
+        PageItemModel.id: id,
+        PageItemModel.pageId: pageId,
+        PageItemModel.name: name,
+        PageItemModel.type: type,
+        PageItemModel.data: data,
+        PageItemModel.attributes:
             attributes != null ? jsonEncode(attributes) : null,
-        ItemModel.categories: categories?.join(','),
-        ItemModel.coordinateX: coordinates.x,
-        ItemModel.coordinateY: coordinates.y,
-        ItemModel.width: width,
-        ItemModel.height: height,
-        ItemModel.rotation: rotation,
-        ItemModel.createTime: createTime.millisecondsSinceEpoch,
-        ItemModel.lastModifiedTime: lastModifiedTime.millisecondsSinceEpoch,
+        PageItemModel.categories: categories?.join(','),
+        PageItemModel.coordinateX: coordinates.x,
+        PageItemModel.coordinateY: coordinates.y,
+        PageItemModel.width: width,
+        PageItemModel.height: height,
+        PageItemModel.rotation: rotation,
+        PageItemModel.createTime: createTime.millisecondsSinceEpoch,
+        PageItemModel.lastModifiedTime: lastModifiedTime.millisecondsSinceEpoch,
       };
 
   @override
-  bool operator ==(Object other) => other is Item && hashCode == other.hashCode;
+  bool operator ==(Object other) =>
+      other is PageItem && hashCode == other.hashCode;
 
   @override
   int get hashCode => const MapEquality().hash(toJson());

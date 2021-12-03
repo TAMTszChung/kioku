@@ -9,8 +9,8 @@ class BookCardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var provider = context.watch<BookProvider>();
-    var book = provider.get(id);
+    final provider = context.watch<BookProvider>();
+    final book = provider.get(id);
 
     List<Widget> widgets = [
       Center(

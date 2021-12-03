@@ -1,22 +1,22 @@
 import 'package:kioku/model/book.dart';
-import 'package:kioku/model/page.dart';
+import 'package:kioku/model/book_page.dart';
 import 'package:kioku/provider/book.dart';
 import 'package:kioku/provider/data.dart';
 import 'package:kioku/service/database.dart';
 
-class PageProvider extends DataProvider {
+class BookPageProvider extends DataProvider {
   final BookProvider bookProvider;
 
-  PageProvider(this.bookProvider)
+  BookPageProvider(this.bookProvider)
       : super(
             tableName: 'Page',
-            model: PageModel(
+            model: BookPageModel(
                 bookTableName: bookProvider.tableName,
                 bookTableIdCol: bookProvider.model.cols[BookModel.id]!));
 
-  List<Page> _pages = [];
+  List<BookPage> _pages = [];
 
-  List<Page> get pages => [..._pages];
+  List<BookPage> get pages => [..._pages];
 
   @override
   Future<bool> fetchAll() async {
@@ -24,14 +24,20 @@ class PageProvider extends DataProvider {
 
     final db = await DBHelper.instance.db;
     final maps = await db.query(tableName);
-    _pages = maps.map((json) => Page.fromJson(json)).toList();
+    _pages = maps.map((json) => BookPage.fromJson(json)).toList();
     notifyListeners();
     return true;
   }
 
-  Future<Page?> insert(Page page) async {
+  Future<BookPage?> insert(BookPage page) async {
     final db = await DBHelper.instance.db;
     final data = page.toJson();
+    final pageNumber = data[BookPageModel.pageNumber] as int?;
+    if (pageNumber == null || pageNumber < 1) {
+      final bookId = data[BookPageModel.bookId] as int;
+      final numPages = _pages.where((page) => page.bookId == bookId).length;
+      data[BookPageModel.pageNumber] = numPages + 1;
+    }
     final id = await db.insert(tableName, data);
     final insertedPage = await fetch(id);
     if (insertedPage == null) return null;
@@ -40,12 +46,12 @@ class PageProvider extends DataProvider {
     return insertedPage;
   }
 
-  Future<Page?> fetch(int? id, {int? bookId, int? pageNumber}) async {
+  Future<BookPage?> fetch(int? id, {int? bookId, int? pageNumber}) async {
     final db = await DBHelper.instance.db;
     late final List<Map<String, Object?>> maps;
     if (id != null) {
       maps = await db
-          .query(tableName, where: '${PageModel.id} = ?', whereArgs: [id]);
+          .query(tableName, where: '${BookPageModel.id} = ?', whereArgs: [id]);
     } else {
       if (bookId == null || pageNumber == null) {
         throw ArgumentError(
@@ -53,31 +59,33 @@ class PageProvider extends DataProvider {
             'id, bookId, pageNumber');
       }
       maps = await db.query(tableName,
-          where: '${PageModel.bookId} = ? AND ${PageModel.pageNumber} = ?',
+          where:
+              '${BookPageModel.bookId} = ? AND ${BookPageModel.pageNumber} = ?',
           whereArgs: [bookId, pageNumber]);
     }
     if (maps.isNotEmpty) {
-      return Page.fromJson(maps.first);
+      return BookPage.fromJson(maps.first);
     } else {
       return null;
     }
   }
 
-  Future<Page?> update(Page pageToUpdate) async {
+  Future<BookPage?> update(BookPage pageToUpdate) async {
     final db = await DBHelper.instance.db;
     final data = pageToUpdate.toJson();
-    final id = data[PageModel.id] as int?;
+    final id = data[BookPageModel.id] as int?;
     if (id == null) {
       throw ArgumentError('id property cannot be null', 'pageToUpdate');
     }
-    data.remove(PageModel.id);
-    data[PageModel.lastModifiedTime] = DateTime.now().millisecondsSinceEpoch;
-    final count = await db
-        .update(tableName, data, where: '${PageModel.id} = ?', whereArgs: [id]);
+    data.remove(BookPageModel.id);
+    data[BookPageModel.lastModifiedTime] =
+        DateTime.now().millisecondsSinceEpoch;
+    final count = await db.update(tableName, data,
+        where: '${BookPageModel.id} = ?', whereArgs: [id]);
     if (count != 1) throw Exception('Cannot update page with id $id');
     final updatedPage = await fetch(id);
     if (updatedPage == null) return null;
-    var index = _pages.indexWhere((page) => page.id == id);
+    final index = _pages.indexWhere((page) => page.id == id);
     if (index < 0) {
       _pages.add(updatedPage);
     } else {
@@ -88,8 +96,8 @@ class PageProvider extends DataProvider {
     return updatedPage;
   }
 
-  Page get(int? id, {int? bookId, int? pageNumber}) {
-    late final Page page;
+  BookPage get(int? id, {int? bookId, int? pageNumber}) {
+    late final BookPage page;
     if (id != null) {
       page = _pages.singleWhere((page) => page.id == id);
     } else {
@@ -102,5 +110,9 @@ class PageProvider extends DataProvider {
           (page) => page.bookId == bookId && page.pageNumber == pageNumber);
     }
     return page;
+  }
+
+  List<BookPage> getAllByBookId(int bookId) {
+    return _pages.where((page) => page.bookId == bookId).toList();
   }
 }

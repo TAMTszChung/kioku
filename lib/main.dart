@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kioku/provider/book.dart';
-import 'package:kioku/provider/page.dart';
+import 'package:kioku/provider/book_page.dart';
 import 'package:kioku/screen/book_overview.dart';
 import 'package:kioku/screen/cover_display.dart';
 import 'package:kioku/screen/cover_edit.dart';
@@ -22,7 +22,8 @@ class MyApp extends StatelessWidget {
         providers: [
           ChangeNotifierProvider(create: (_) => BookProvider()),
           ChangeNotifierProvider(
-              create: (context) => PageProvider(context.read<BookProvider>())),
+              create: (context) =>
+                  BookPageProvider(context.read<BookProvider>())),
         ],
         child: MaterialApp(
           title: 'Kioku',

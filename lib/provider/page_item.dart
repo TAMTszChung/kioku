@@ -1,22 +1,22 @@
-import 'package:kioku/model/item.dart';
-import 'package:kioku/model/page.dart';
+import 'package:kioku/model/book_page.dart';
+import 'package:kioku/model/page_item.dart';
+import 'package:kioku/provider/book_page.dart';
 import 'package:kioku/provider/data.dart';
-import 'package:kioku/provider/page.dart';
 import 'package:kioku/service/database.dart';
 
-class ItemProvider extends DataProvider {
-  final PageProvider pageProvider;
+class PageItemProvider extends DataProvider {
+  final BookPageProvider pageProvider;
 
-  ItemProvider(this.pageProvider)
+  PageItemProvider(this.pageProvider)
       : super(
             tableName: 'Item',
-            model: ItemModel(
+            model: PageItemModel(
                 pageTableName: pageProvider.tableName,
-                pageTableIdCol: pageProvider.model.cols[PageModel.id]!));
+                pageTableIdCol: pageProvider.model.cols[BookPageModel.id]!));
 
-  List<Item> _items = [];
+  List<PageItem> _items = [];
 
-  List<Item> get items => [..._items];
+  List<PageItem> get items => [..._items];
 
   @override
   Future<bool> fetchAll() async {
@@ -24,12 +24,12 @@ class ItemProvider extends DataProvider {
 
     final db = await DBHelper.instance.db;
     final maps = await db.query(tableName);
-    _items = maps.map((json) => Item.fromJson(json)).toList();
+    _items = maps.map((json) => PageItem.fromJson(json)).toList();
     notifyListeners();
     return true;
   }
 
-  Future<Item?> insert(Item item) async {
+  Future<PageItem?> insert(PageItem item) async {
     final db = await DBHelper.instance.db;
     final data = item.toJson();
     final id = await db.insert(tableName, data);
@@ -40,33 +40,34 @@ class ItemProvider extends DataProvider {
     return insertedItem;
   }
 
-  Future<Item?> fetch(int id) async {
+  Future<PageItem?> fetch(int id) async {
     final db = await DBHelper.instance.db;
     late final List<Map<String, Object?>> maps;
     maps = await db
-        .query(tableName, where: '${ItemModel.id} = ?', whereArgs: [id]);
+        .query(tableName, where: '${PageItemModel.id} = ?', whereArgs: [id]);
     if (maps.isNotEmpty) {
-      return Item.fromJson(maps.first);
+      return PageItem.fromJson(maps.first);
     } else {
       return null;
     }
   }
 
-  Future<Item?> update(Item itemToUpdate) async {
+  Future<PageItem?> update(PageItem itemToUpdate) async {
     final db = await DBHelper.instance.db;
     final data = itemToUpdate.toJson();
-    final id = data[ItemModel.id] as int?;
+    final id = data[PageItemModel.id] as int?;
     if (id == null) {
       throw ArgumentError('id property cannot be null', 'itemToUpdate');
     }
-    data.remove(ItemModel.id);
-    data[ItemModel.lastModifiedTime] = DateTime.now().millisecondsSinceEpoch;
-    final count = await db
-        .update(tableName, data, where: '${ItemModel.id} = ?', whereArgs: [id]);
+    data.remove(PageItemModel.id);
+    data[PageItemModel.lastModifiedTime] =
+        DateTime.now().millisecondsSinceEpoch;
+    final count = await db.update(tableName, data,
+        where: '${PageItemModel.id} = ?', whereArgs: [id]);
     if (count != 1) throw Exception('Cannot update item with id $id');
     final updatedItem = await fetch(id);
     if (updatedItem == null) return null;
-    var index = _items.indexWhere((item) => item.id == id);
+    final index = _items.indexWhere((item) => item.id == id);
     if (index < 0) {
       _items.add(updatedItem);
     } else {
@@ -77,7 +78,7 @@ class ItemProvider extends DataProvider {
     return updatedItem;
   }
 
-  Item get(int id) {
+  PageItem get(int id) {
     return _items.singleWhere((page) => page.id == id);
   }
 }

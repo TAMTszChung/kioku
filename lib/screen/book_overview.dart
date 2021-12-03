@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:kioku/component/organism/book_cardview.dart';
 import 'package:kioku/component/organism/book_listview.dart';
 import 'package:kioku/component/organism/book_pageview.dart';
+import 'package:kioku/model/book_page.dart';
 import 'package:kioku/provider/book.dart';
+import 'package:kioku/provider/book_page.dart';
 import 'package:provider/provider.dart';
 
 class BookOverview extends StatefulWidget {
@@ -17,6 +19,7 @@ class BookOverview extends StatefulWidget {
 
 class _BookOverviewState extends State<BookOverview> {
   String _viewMode = 'Book';
+  bool addingPage = false;
 
   Widget showSubView() {
     switch (_viewMode) {
@@ -32,12 +35,27 @@ class _BookOverviewState extends State<BookOverview> {
 
   @override
   Widget build(BuildContext context) {
-    var provider = context.watch<BookProvider>();
-    var book = provider.get(widget.id);
+    final provider = context.watch<BookProvider>();
+    final book = provider.get(widget.id);
+    final pageProvider = context.read<BookPageProvider>();
     return Scaffold(
       appBar: AppBar(
         title: Text(book.title),
         actions: <Widget>[
+          if (_viewMode == 'Book')
+            IconButton(
+                onPressed: addingPage
+                    ? null
+                    : () async {
+                        setState(() {
+                          addingPage = true;
+                        });
+                        await pageProvider.insert(BookPage(bookId: widget.id));
+                        setState(() {
+                          addingPage = false;
+                        });
+                      },
+                icon: const Icon(Icons.add)),
           PopupMenuButton<String>(
             icon: const Icon(
               Icons.dashboard_rounded,
@@ -70,7 +88,7 @@ class _BookOverviewState extends State<BookOverview> {
                 child: Text('List'),
               ),
             ],
-          )
+          ),
         ],
       ),
       body: showSubView(),
