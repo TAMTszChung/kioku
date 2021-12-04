@@ -90,6 +90,16 @@ class PageItemProvider extends DataProvider {
         .sortedBy<num>((item) => item.zIndex);
   }
 
+  List<PageItem> getAllByPageIdList(List<int> pageIds) {
+    return _items
+        .where((item) => pageIds.contains(item.pageId))
+        .toList()
+        .sorted((a, b) {
+      if (a.pageId != b.pageId) return a.pageId.compareTo(b.pageId);
+      return a.zIndex.compareTo(b.zIndex);
+    });
+  }
+
   Future<List<PageItem>> setAll(List<PageItem> listToSet) async {
     final db = await DBHelper.instance.db;
     final batch = db.batch();
@@ -114,7 +124,7 @@ class PageItemProvider extends DataProvider {
       final data = item.toJson();
       final zIndex = data[PageItemModel.zIndex] as int;
       if (zIndex < 0) {
-        // IMPORTANT: for each pageId, there must be at most 1 item with id null
+        // IMPORTANT: for each pageId, there must be at most 1 item with zIndex < 0
         final pageId = data[PageItemModel.pageId] as int;
         final numItems = _items.where((item) => item.pageId == pageId).length;
         data[PageItemModel.zIndex] = numItems + 1;
