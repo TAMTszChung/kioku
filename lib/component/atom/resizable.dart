@@ -39,6 +39,7 @@ class _ResizableState extends State<Resizable> {
   @override
   Widget build(BuildContext context) {
     return Stack(
+      clipBehavior: Clip.none,
       children: <Widget>[
         Positioned(
           top: top,
@@ -64,22 +65,16 @@ class _ResizableState extends State<Resizable> {
           child: ControlPoint(
             onDrag: (dx, dy) {
               double offset = dx + dy;
-              double newHeight =
-                  (height - offset).clamp(minSize, widget.containerHeight);
-              double newWidth =
-                  (width - offset).clamp(minSize, widget.containerWidth);
-              if (newHeight == minSize || newWidth == minSize) {
-                newHeight = height;
-                newWidth = width;
-                offset = 0;
-              }
+              double newHeight = height - offset;
+              double newWidth = width - offset;
+              if (newHeight <= minSize || newWidth <= minSize) return;
               final mid = offset / 2;
 
               setState(() {
                 height = newHeight;
                 width = newWidth;
-                top = (top + mid).clamp(0, widget.containerHeight - newHeight);
-                left = (left + mid).clamp(0, widget.containerWidth - newWidth);
+                top = top + mid;
+                left = left + mid;
               });
             },
             handlerWidget: HandlerWidget.DIAGONAL,
@@ -91,13 +86,12 @@ class _ResizableState extends State<Resizable> {
           left: left + width / 2 - ControlPoint.offset,
           child: ControlPoint(
             onDrag: (dx, dy) {
-              final double newHeight =
-                  (height - dy).clamp(minSize, widget.containerHeight);
-              if (newHeight == height) dy = 0;
+              double newHeight = height - dy;
+              if (newHeight <= minSize) return;
 
               setState(() {
                 height = newHeight;
-                top = (top + dy).clamp(0, widget.containerHeight - newHeight);
+                top = top + dy;
               });
             },
             handlerWidget: HandlerWidget.AXIS,
@@ -110,22 +104,16 @@ class _ResizableState extends State<Resizable> {
           child: ControlPoint(
             onDrag: (dx, dy) {
               double offset = dx + -dy;
-              double newHeight =
-                  (height + offset).clamp(minSize, widget.containerHeight);
-              double newWidth =
-                  (width + offset).clamp(minSize, widget.containerWidth);
-              if (newHeight == minSize || newWidth == minSize) {
-                newHeight = height;
-                newWidth = width;
-                offset = 0;
-              }
+              double newHeight = height + offset;
+              double newWidth = width + offset;
+              if (newHeight <= minSize || newWidth <= minSize) return;
               final mid = offset / 2;
 
               setState(() {
                 height = newHeight;
                 width = newWidth;
-                top = (top - mid).clamp(0, widget.containerHeight - newHeight);
-                left = (left - mid).clamp(0, widget.containerWidth - newWidth);
+                top = top - mid;
+                left = left - mid;
               });
             },
             handlerWidget: HandlerWidget.DIAGONAL,
@@ -137,9 +125,8 @@ class _ResizableState extends State<Resizable> {
           left: left + width - ControlPoint.offset,
           child: ControlPoint(
             onDrag: (dx, dy) {
-              final double newWidth =
-                  (width + dx).clamp(minSize, widget.containerWidth);
-              if (newWidth == width) dx = 0;
+              double newWidth = width + dx;
+              if (newWidth <= minSize) return;
 
               setState(() {
                 width = newWidth;
@@ -155,22 +142,16 @@ class _ResizableState extends State<Resizable> {
           child: ControlPoint(
             onDrag: (dx, dy) {
               double offset = dx + dy;
-              double newHeight =
-                  (height + offset).clamp(minSize, widget.containerHeight);
-              double newWidth =
-                  (width + offset).clamp(minSize, widget.containerWidth);
-              if (newHeight == minSize || newWidth == minSize) {
-                newHeight = height;
-                newWidth = width;
-                offset = 0;
-              }
+              double newHeight = height + offset;
+              double newWidth = width + offset;
+              if (newHeight <= minSize || newWidth <= minSize) return;
               final mid = offset / 2;
 
               setState(() {
                 height = newHeight;
                 width = newWidth;
-                top = (top - mid).clamp(0, widget.containerHeight - newHeight);
-                left = (left - mid).clamp(0, widget.containerWidth - newWidth);
+                top = top - mid;
+                left = left - mid;
               });
             },
             handlerWidget: HandlerWidget.DIAGONAL,
@@ -182,9 +163,11 @@ class _ResizableState extends State<Resizable> {
           left: left + width / 2 - ControlPoint.offset,
           child: ControlPoint(
             onDrag: (dx, dy) {
-              final double newHeight =
-                  (height + dy).clamp(minSize, widget.containerHeight);
-              if (newHeight == height) dy = 0;
+              double newHeight = height + dy;
+              if (newHeight <= minSize) {
+                newHeight = height;
+                dy = 0;
+              }
 
               setState(() {
                 height = newHeight;
@@ -200,22 +183,16 @@ class _ResizableState extends State<Resizable> {
           child: ControlPoint(
             onDrag: (dx, dy) {
               double offset = -dx + dy;
-              double newHeight =
-                  (height + offset).clamp(minSize, widget.containerHeight);
-              double newWidth =
-                  (width + offset).clamp(minSize, widget.containerWidth);
-              if (newHeight == minSize || newWidth == minSize) {
-                newHeight = height;
-                newWidth = width;
-                offset = 0;
-              }
+              double newHeight = height + offset;
+              double newWidth = width + offset;
+              if (newHeight <= minSize || newWidth <= minSize) return;
               final mid = offset / 2;
 
               setState(() {
                 height = newHeight;
                 width = newWidth;
-                top = (top - mid).clamp(0, widget.containerHeight - newHeight);
-                left = (left - mid).clamp(0, widget.containerWidth - newWidth);
+                top = top - mid;
+                left = left - mid;
               });
             },
             handlerWidget: HandlerWidget.DIAGONAL,
@@ -227,13 +204,12 @@ class _ResizableState extends State<Resizable> {
           left: left - ControlPoint.offset,
           child: ControlPoint(
             onDrag: (dx, dy) {
-              final double newWidth =
-                  (width - dx).clamp(minSize, widget.containerWidth);
-              if (newWidth == width) dx = 0;
+              double newWidth = width - dx;
+              if (newWidth <= minSize) return;
 
               setState(() {
                 width = newWidth;
-                left = (left + dx).clamp(0, widget.containerWidth - newWidth);
+                left = left + dx;
               });
             },
             handlerWidget: HandlerWidget.AXIS,
@@ -246,8 +222,8 @@ class _ResizableState extends State<Resizable> {
           child: ControlPoint(
             onDrag: (dx, dy) {
               setState(() {
-                top = (top + dy).clamp(0, widget.containerHeight - height);
-                left = (left + dx).clamp(0, widget.containerWidth - width);
+                top = top + dy;
+                left = left + dx;
               });
             },
             handlerWidget: HandlerWidget.FREE,
