@@ -4,14 +4,20 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:kioku/component/atom/resizable.dart';
 import 'package:kioku/component/molecule/custom_image_picker.dart';
+import 'package:kioku/model/book_page.dart';
 import 'package:kioku/model/page_item.dart';
+import 'package:kioku/provider/book_page.dart';
+import 'package:kioku/provider/page_item.dart';
+import 'package:provider/provider.dart';
 
 enum ToolbarType { basic, text, image }
 
 class PageEditPage extends StatefulWidget {
   final int id;
+
   const PageEditPage(this.id, {Key? key}) : super(key: key);
 
   @override
@@ -22,7 +28,20 @@ class _PageEditPageState extends State<PageEditPage> {
   bool saving = false;
   ToolbarType barSelection = ToolbarType.basic;
 
+  late BookPage page;
   List<PageItem> items = [];
+
+  @override
+  void initState() {
+    super.initState();
+    page = context.read<BookPageProvider>().get(widget.id).copy();
+    items = context
+        .read<PageItemProvider>()
+        .getAllByPageId(widget.id)
+        .map((item) => item.copy())
+        .toList();
+  }
+
   Size dimensionToAllowedPercentage(Size itemSize) {
     final itemWidthOriginalRatio = itemSize.width / 210;
     final itemHeightOriginalRatio = itemSize.width / 297;
@@ -53,6 +72,30 @@ class _PageEditPageState extends State<PageEditPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
+          IconButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      content: SingleChildScrollView(
+                        child: HueRingPicker(
+                          pickerColor: page.color,
+                          onColorChanged: (Color newColor) {
+                            page.color = newColor;
+                            setState(() {
+                              page = page;
+                            });
+                          },
+                          enableAlpha: false,
+                          displayThumbColor: true,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+              icon: const Icon(Icons.format_color_fill)),
           IconButton(
               onPressed: () async {
                 final File? res = await CustomImagePicker.pickMedia(
@@ -202,7 +245,7 @@ class _PageEditPageState extends State<PageEditPage> {
                         child: LayoutBuilder(builder: (context, constraints) {
                           return Container(
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: page.color,
                               borderRadius: BorderRadius.circular(15),
                               boxShadow: [
                                 BoxShadow(
