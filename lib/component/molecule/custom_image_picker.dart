@@ -33,9 +33,11 @@ class CustomImagePicker {
       );
     } else {
       croppecdFile = await ImageCropper.cropImage(
-        sourcePath: file.path,
-        compressQuality: compressRatio,
-      );
+          sourcePath: file.path,
+          compressQuality: compressRatio,
+          androidUiSettings: const AndroidUiSettings(
+              initAspectRatio: CropAspectRatioPreset.original,
+              lockAspectRatio: false));
     }
 
     return croppecdFile;

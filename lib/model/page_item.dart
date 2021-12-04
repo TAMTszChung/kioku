@@ -33,7 +33,7 @@ class PageItemModel extends BaseModel {
           DBCol(name: name, type: DBType.text()),
           DBCol(name: type, type: DBType.text(notNull: true)),
           DBCol(name: data, type: DBType.blob(notNull: true)),
-          DBCol(name: attributes, type: DBType.text()),
+          DBCol(name: attributes, type: DBType.text(notNull: true)),
           DBCol(name: categories, type: DBType.text()),
           DBCol(name: coordinateX, type: DBType.real(notNull: true)),
           DBCol(name: coordinateY, type: DBType.real(notNull: true)),
@@ -67,7 +67,7 @@ class PageItem {
   String? name; // name
   PageItemType type; // type
   Uint8List data; // data in bytes
-  Map<String, String>? attributes; // attributes of data
+  Map<String, String> attributes; // attributes of data
   List<String>? categories; // categories
   Point<double> coordinates; // coordinates (x, y are in percent)
   double width; // width (in percent)
@@ -84,7 +84,7 @@ class PageItem {
       this.name,
       required this.type,
       required this.data,
-      this.attributes,
+      required this.attributes,
       this.categories,
       required this.coordinates,
       required this.width,
@@ -106,12 +106,21 @@ class PageItem {
       double rotation = 0.0,
       required int zIndex,
       DateTime? datetime}) {
+    final Map<String, String> attributes = {};
+    attributes['underline'] = 'false';
+    attributes['italic'] = 'false';
+    attributes['bold'] = 'false';
+    attributes['fontFamily'] = 'Merriweather';
+    attributes['fontSize'] = '20';
+    attributes['color'] = 'ff000000';
+    attributes['backgroundColor'] = '00000000';
     final timestamp = DateTime.now();
     return PageItem._internal(
         pageId: pageId,
         name: name,
         type: type,
         data: data,
+        attributes: attributes,
         coordinates: coordinates,
         width: width,
         height: height,
@@ -123,13 +132,6 @@ class PageItem {
   }
 
   factory PageItem.fromJson(Map<String, Object?> json) {
-    Map<String, String>? attributes;
-    final attributesStr = json[PageItemModel.attributes] as String?;
-    if (attributesStr != null) {
-      attributes = jsonDecode(attributesStr, reviver: (key, value) {
-        return value is String ? value : value.toString();
-      });
-    }
     List<String>? categories;
     final categoriesStr = json[PageItemModel.categories] as String?;
     if (categoriesStr != null) {
@@ -141,7 +143,7 @@ class PageItem {
         name: json[PageItemModel.name] as String?,
         type: json[PageItemModel.type] as PageItemType,
         data: json[PageItemModel.data] as Uint8List,
-        attributes: attributes,
+        attributes: jsonDecode(json[PageItemModel.attributes] as String),
         categories: categories,
         coordinates: Point<double>(json[PageItemModel.coordinateX] as double,
             json[PageItemModel.coordinateY] as double),
@@ -180,8 +182,11 @@ class PageItem {
         name: name ?? original.name,
         type: type ?? original.type,
         data: data ?? original.data,
-        attributes: attributes ?? original.attributes,
-        categories: categories ?? original.categories,
+        attributes: attributes ?? Map.from(original.attributes),
+        categories: categories ??
+            (original.categories != null
+                ? List.from(original.categories!)
+                : null),
         coordinates: coordinates ?? original.coordinates,
         width: width ?? original.width,
         height: height ?? original.height,
@@ -227,8 +232,7 @@ class PageItem {
         PageItemModel.name: name,
         PageItemModel.type: type,
         PageItemModel.data: data,
-        PageItemModel.attributes:
-            attributes != null ? jsonEncode(attributes) : null,
+        PageItemModel.attributes: jsonEncode(attributes),
         PageItemModel.categories: categories?.join(','),
         PageItemModel.coordinateX: coordinates.x,
         PageItemModel.coordinateY: coordinates.y,
