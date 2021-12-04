@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 class BookListView extends StatelessWidget {
   final int id;
-
   const BookListView(this.id, {Key? key}) : super(key: key);
 
   @override
@@ -12,22 +11,10 @@ class BookListView extends StatelessWidget {
     final provider = context.watch<BookProvider>();
     final book = provider.get(id);
 
-    const List<Widget> widgets = [
-      Center(
-        child: Text("ListItem"),
-      ),
-      Center(
-        child: Text("ListItem"),
-      ),
-      Center(
-        child: Text("ListItem"),
-      ),
-    ];
-
     return ListView(
       shrinkWrap: true,
       padding: const EdgeInsets.all(8),
-      children: widgets,
+      children: [],
     );
   }
 }

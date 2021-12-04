@@ -12,22 +12,12 @@ class BookCardView extends StatelessWidget {
     final provider = context.watch<BookProvider>();
     final book = provider.get(id);
 
-    const List<Widget> widgets = [
-      Center(
-        child: Text("Card"),
-      ),
-      Center(
-        child: Text("Card"),
-      ),
-      Center(
-        child: Text("Card"),
-      ),
-    ];
-
-    return ListView(
-      shrinkWrap: true,
-      padding: const EdgeInsets.all(8),
-      children: widgets,
+    return GridView.count(
+      primary: false,
+      padding: const EdgeInsets.all(20),
+      mainAxisSpacing: 40,
+      crossAxisCount: 2,
+      children: [],
     );
   }
 }
