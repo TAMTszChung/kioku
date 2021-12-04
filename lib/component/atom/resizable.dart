@@ -21,6 +21,8 @@ class Resizable extends StatefulWidget {
 }
 
 class _ResizableState extends State<Resizable> {
+  static const minSize = ControlPoint.diameter * 3;
+
   late double height;
   late double width;
 
@@ -44,7 +46,6 @@ class _ResizableState extends State<Resizable> {
           child: Container(
             height: height,
             width: width,
-
             decoration: BoxDecoration(
               color: Colors.blueGrey,
               border: Border.all(
@@ -53,8 +54,6 @@ class _ResizableState extends State<Resizable> {
               ),
               borderRadius: BorderRadius.circular(0.0),
             ),
-
-            // need tp check if draggable is done from corner or sides
             child: FittedBox(child: widget.child, fit: BoxFit.fill),
           ),
         ),
@@ -64,18 +63,26 @@ class _ResizableState extends State<Resizable> {
           left: left - ControlPoint.offset,
           child: ControlPoint(
             onDrag: (dx, dy) {
-              var mid = (dx + dy) / 2;
-              var newHeight = height - 2 * mid;
-              var newWidth = width - 2 * mid;
+              double offset = dx + dy;
+              double newHeight =
+                  (height - offset).clamp(minSize, widget.containerHeight);
+              double newWidth =
+                  (width - offset).clamp(minSize, widget.containerWidth);
+              if (newHeight == minSize || newWidth == minSize) {
+                newHeight = height;
+                newWidth = width;
+                offset = 0;
+              }
+              final mid = offset / 2;
 
               setState(() {
-                height = newHeight > 0 ? newHeight : 0;
-                width = newWidth > 0 ? newWidth : 0;
-                top = top + mid;
-                left = left + mid;
+                height = newHeight;
+                width = newWidth;
+                top = (top + mid).clamp(0, widget.containerHeight - newHeight);
+                left = (left + mid).clamp(0, widget.containerWidth - newWidth);
               });
             },
-            handlerWidget: HandlerWidget.VERTICAL,
+            handlerWidget: HandlerWidget.DIAGONAL,
           ),
         ),
         // top middle
@@ -84,14 +91,16 @@ class _ResizableState extends State<Resizable> {
           left: left + width / 2 - ControlPoint.offset,
           child: ControlPoint(
             onDrag: (dx, dy) {
-              var newHeight = height - dy;
+              final double newHeight =
+                  (height - dy).clamp(minSize, widget.containerHeight);
+              if (newHeight == height) dy = 0;
 
               setState(() {
-                height = newHeight > 0 ? newHeight : 0;
-                top = top + dy;
+                height = newHeight;
+                top = (top + dy).clamp(0, widget.containerHeight - newHeight);
               });
             },
-            handlerWidget: HandlerWidget.HORIZONTAL,
+            handlerWidget: HandlerWidget.AXIS,
           ),
         ),
         // top right
@@ -100,19 +109,26 @@ class _ResizableState extends State<Resizable> {
           left: left + width - ControlPoint.offset,
           child: ControlPoint(
             onDrag: (dx, dy) {
-              var mid = (dx + (dy * -1)) / 2;
-
-              var newHeight = height + 2 * mid;
-              var newWidth = width + 2 * mid;
+              double offset = dx + -dy;
+              double newHeight =
+                  (height + offset).clamp(minSize, widget.containerHeight);
+              double newWidth =
+                  (width + offset).clamp(minSize, widget.containerWidth);
+              if (newHeight == minSize || newWidth == minSize) {
+                newHeight = height;
+                newWidth = width;
+                offset = 0;
+              }
+              final mid = offset / 2;
 
               setState(() {
-                height = newHeight > 0 ? newHeight : 0;
-                width = newWidth > 0 ? newWidth : 0;
-                top = top - mid;
-                left = left - mid;
+                height = newHeight;
+                width = newWidth;
+                top = (top - mid).clamp(0, widget.containerHeight - newHeight);
+                left = (left - mid).clamp(0, widget.containerWidth - newWidth);
               });
             },
-            handlerWidget: HandlerWidget.VERTICAL,
+            handlerWidget: HandlerWidget.DIAGONAL,
           ),
         ),
         // center right
@@ -121,13 +137,15 @@ class _ResizableState extends State<Resizable> {
           left: left + width - ControlPoint.offset,
           child: ControlPoint(
             onDrag: (dx, dy) {
-              var newWidth = width + dx;
+              final double newWidth =
+                  (width + dx).clamp(minSize, widget.containerWidth);
+              if (newWidth == width) dx = 0;
 
               setState(() {
-                width = newWidth > 0 ? newWidth : 0;
+                width = newWidth;
               });
             },
-            handlerWidget: HandlerWidget.HORIZONTAL,
+            handlerWidget: HandlerWidget.AXIS,
           ),
         ),
         // bottom right
@@ -136,19 +154,26 @@ class _ResizableState extends State<Resizable> {
           left: left + width - ControlPoint.offset,
           child: ControlPoint(
             onDrag: (dx, dy) {
-              var mid = (dx + dy) / 2;
-
-              var newHeight = height + 2 * mid;
-              var newWidth = width + 2 * mid;
+              double offset = dx + dy;
+              double newHeight =
+                  (height + offset).clamp(minSize, widget.containerHeight);
+              double newWidth =
+                  (width + offset).clamp(minSize, widget.containerWidth);
+              if (newHeight == minSize || newWidth == minSize) {
+                newHeight = height;
+                newWidth = width;
+                offset = 0;
+              }
+              final mid = offset / 2;
 
               setState(() {
-                height = newHeight > 0 ? newHeight : 0;
-                width = newWidth > 0 ? newWidth : 0;
-                top = top - mid;
-                left = left - mid;
+                height = newHeight;
+                width = newWidth;
+                top = (top - mid).clamp(0, widget.containerHeight - newHeight);
+                left = (left - mid).clamp(0, widget.containerWidth - newWidth);
               });
             },
-            handlerWidget: HandlerWidget.VERTICAL,
+            handlerWidget: HandlerWidget.DIAGONAL,
           ),
         ),
         // bottom center
@@ -157,13 +182,15 @@ class _ResizableState extends State<Resizable> {
           left: left + width / 2 - ControlPoint.offset,
           child: ControlPoint(
             onDrag: (dx, dy) {
-              var newHeight = height + dy;
+              final double newHeight =
+                  (height + dy).clamp(minSize, widget.containerHeight);
+              if (newHeight == height) dy = 0;
 
               setState(() {
-                height = newHeight > 0 ? newHeight : 0;
+                height = newHeight;
               });
             },
-            handlerWidget: HandlerWidget.HORIZONTAL,
+            handlerWidget: HandlerWidget.AXIS,
           ),
         ),
         // bottom left
@@ -172,35 +199,44 @@ class _ResizableState extends State<Resizable> {
           left: left - ControlPoint.offset,
           child: ControlPoint(
             onDrag: (dx, dy) {
-              var mid = ((dx * -1) + dy) / 2;
-
-              var newHeight = height + 2 * mid;
-              var newWidth = width + 2 * mid;
+              double offset = -dx + dy;
+              double newHeight =
+                  (height + offset).clamp(minSize, widget.containerHeight);
+              double newWidth =
+                  (width + offset).clamp(minSize, widget.containerWidth);
+              if (newHeight == minSize || newWidth == minSize) {
+                newHeight = height;
+                newWidth = width;
+                offset = 0;
+              }
+              final mid = offset / 2;
 
               setState(() {
-                height = newHeight > 0 ? newHeight : 0;
-                width = newWidth > 0 ? newWidth : 0;
-                top = top - mid;
-                left = left - mid;
+                height = newHeight;
+                width = newWidth;
+                top = (top - mid).clamp(0, widget.containerHeight - newHeight);
+                left = (left - mid).clamp(0, widget.containerWidth - newWidth);
               });
             },
-            handlerWidget: HandlerWidget.VERTICAL,
+            handlerWidget: HandlerWidget.DIAGONAL,
           ),
         ),
-        //left center
+        // left center
         Positioned(
           top: top + height / 2 - ControlPoint.offset,
           left: left - ControlPoint.offset,
           child: ControlPoint(
             onDrag: (dx, dy) {
-              var newWidth = width - dx;
+              final double newWidth =
+                  (width - dx).clamp(minSize, widget.containerWidth);
+              if (newWidth == width) dx = 0;
 
               setState(() {
-                width = newWidth > 0 ? newWidth : 0;
-                left = left + dx;
+                width = newWidth;
+                left = (left + dx).clamp(0, widget.containerWidth - newWidth);
               });
             },
-            handlerWidget: HandlerWidget.HORIZONTAL,
+            handlerWidget: HandlerWidget.AXIS,
           ),
         ),
         // center center
@@ -210,11 +246,11 @@ class _ResizableState extends State<Resizable> {
           child: ControlPoint(
             onDrag: (dx, dy) {
               setState(() {
-                top = top + dy;
-                left = left + dx;
+                top = (top + dy).clamp(0, widget.containerHeight - height);
+                left = (left + dx).clamp(0, widget.containerWidth - width);
               });
             },
-            handlerWidget: HandlerWidget.VERTICAL,
+            handlerWidget: HandlerWidget.FREE,
           ),
         ),
       ],
@@ -222,50 +258,47 @@ class _ResizableState extends State<Resizable> {
   }
 }
 
+typedef ControlPointDragCallback = void Function(double dx, double dy);
+
 class ControlPoint extends StatefulWidget {
   static const diameter = 15.0;
   static const padding = 20.0;
-
   static double get offset => diameter / 2 + padding;
+
+  final ControlPointDragCallback onDrag;
+  final HandlerWidget handlerWidget;
 
   const ControlPoint(
       {required this.onDrag, required this.handlerWidget, Key? key})
       : super(key: key);
-
-  final Function onDrag;
-  final HandlerWidget handlerWidget;
 
   @override
   _ControlPointState createState() => _ControlPointState();
 }
 
 // ignore: constant_identifier_names
-enum HandlerWidget { HORIZONTAL, VERTICAL }
+enum HandlerWidget { FREE, AXIS, DIAGONAL }
 
 class _ControlPointState extends State<ControlPoint> {
   late double initX;
   late double initY;
 
-  _handleDrag(details) {
-    setState(() {
-      initX = details.globalPosition.dx;
-      initY = details.globalPosition.dy;
-    });
-  }
-
-  _handleUpdate(details) {
-    var dx = details.globalPosition.dx - initX;
-    var dy = details.globalPosition.dy - initY;
-    initX = details.globalPosition.dx;
-    initY = details.globalPosition.dy;
-    widget.onDrag(dx, dy);
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onPanStart: _handleDrag,
-      onPanUpdate: _handleUpdate,
+      onPanStart: (details) {
+        setState(() {
+          initX = details.localPosition.dx;
+          initY = details.localPosition.dy;
+        });
+      },
+      onPanUpdate: (details) {
+        final double dx = details.localPosition.dx - initX;
+        final double dy = details.localPosition.dy - initY;
+        initX = details.localPosition.dx;
+        initY = details.localPosition.dy;
+        widget.onDrag(dx, dy);
+      },
       behavior: HitTestBehavior.translucent,
       child: Padding(
         padding: const EdgeInsets.all(ControlPoint.padding),
@@ -282,9 +315,9 @@ class _ControlPointState extends State<ControlPoint> {
                 offset: Offset(0, 1),
               ),
             ],
-            shape: widget.handlerWidget == HandlerWidget.VERTICAL
-                ? BoxShape.circle
-                : BoxShape.rectangle,
+            shape: widget.handlerWidget == HandlerWidget.AXIS
+                ? BoxShape.rectangle
+                : BoxShape.circle,
           ),
         ),
       ),

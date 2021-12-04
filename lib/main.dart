@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kioku/provider/book.dart';
 import 'package:kioku/provider/book_page.dart';
+import 'package:kioku/provider/page_item.dart';
 import 'package:kioku/screen/book_overview.dart';
 import 'package:kioku/screen/book_slideshow.dart';
 import 'package:kioku/screen/cover_edit.dart';
@@ -25,6 +26,9 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(
               create: (context) =>
                   BookPageProvider(context.read<BookProvider>())),
+          ChangeNotifierProvider(
+              create: (context) =>
+                  PageItemProvider(context.read<BookPageProvider>())),
         ],
         child: MaterialApp(
           title: 'Kioku',
@@ -56,9 +60,11 @@ class MyApp extends StatelessWidget {
                 });
               case '/page_edit':
                 if (args is! int) return null;
-                return MaterialPageRoute(builder: (context) {
-                  return PageEditPage(args);
-                });
+                return MaterialPageRoute(
+                    builder: (context) {
+                      return PageEditPage(args);
+                    },
+                    fullscreenDialog: true);
               case '/book_overview':
               default:
                 if (args is! int) return null;
