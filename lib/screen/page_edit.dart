@@ -4,9 +4,11 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:kioku/component/atom/resizable.dart';
 import 'package:kioku/component/molecule/custom_image_picker.dart';
+import 'package:kioku/component/molecule/page_item.dart';
 import 'package:kioku/model/book_page.dart';
 import 'package:kioku/model/page_item.dart';
 import 'package:kioku/provider/book_page.dart';
@@ -29,7 +31,9 @@ class _PageEditPageState extends State<PageEditPage> {
   ToolbarType barSelection = ToolbarType.basic;
 
   late BookPage page;
-  List<PageItem> items = [];
+  late List<PageItem> items;
+
+  PageItem? _selectedItem = null;
 
   @override
   void initState() {
@@ -43,63 +47,82 @@ class _PageEditPageState extends State<PageEditPage> {
   }
 
   Size dimensionToAllowedPercentage(Size itemSize) {
-    final itemWidthOriginalRatio = itemSize.width / 210;
-    final itemHeightOriginalRatio = itemSize.width / 297;
+    double itemWidthOriginalRatio = itemSize.width / 210;
+    double itemHeightOriginalRatio = itemSize.height / 297;
     if (itemWidthOriginalRatio > 1 || itemHeightOriginalRatio > 1) {
       if (itemWidthOriginalRatio > itemHeightOriginalRatio) {
-        return Size(1.0, itemHeightOriginalRatio / itemWidthOriginalRatio);
+        return Size(
+            0.8, (itemHeightOriginalRatio / itemWidthOriginalRatio) * 0.8);
       } else {
-        return Size(itemWidthOriginalRatio / itemHeightOriginalRatio, 1.0);
+        return Size(
+            (itemWidthOriginalRatio / itemHeightOriginalRatio) * 0.8, 0.8);
       }
     } else {
       return Size(itemWidthOriginalRatio, itemHeightOriginalRatio);
     }
   }
 
-  Widget basicToolBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 3,
-            blurRadius: 7,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          IconButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      content: SingleChildScrollView(
-                        child: HueRingPicker(
-                          pickerColor: page.color,
-                          onColorChanged: (Color newColor) {
-                            page.color = newColor;
-                            setState(() {
-                              page = page;
-                            });
-                          },
-                          enableAlpha: false,
-                          displayThumbColor: true,
-                        ),
+  Widget basicToolBar(BuildContext context) {
+    return Wrap(
+      children: [
+        IconButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    content: SingleChildScrollView(
+                      child: HueRingPicker(
+                        pickerColor: page.color,
+                        onColorChanged: (Color newColor) {
+                          page.color = newColor;
+                          setState(() {
+                            page = page;
+                          });
+                        },
+                        enableAlpha: false,
+                        displayThumbColor: true,
                       ),
-                    );
-                  },
-                );
-              },
-              icon: const Icon(Icons.format_color_fill)),
-          IconButton(
+                    ),
+                  );
+                },
+              );
+            },
+            icon: const Icon(Icons.format_color_fill)),
+        IconButton(
+            onPressed: () async {
+              final File? res = await CustomImagePicker.pickMedia(
+                  isGallery: true, fixRatio: false);
+              if (res == null) {
+                return;
+              }
+              final imageBytes = await File(res.path).readAsBytes();
+              final imageFile = await decodeImageFromList(imageBytes);
+
+              final ratioDimension = dimensionToAllowedPercentage(Size(
+                  imageFile.width.toDouble(), imageFile.height.toDouble()));
+
+              final newItem = PageItem(
+                  pageId: widget.id,
+                  type: PageItemType.IMAGE,
+                  data: imageBytes,
+                  coordinates: const Point(0.1, 0.1),
+                  width: ratioDimension.width,
+                  height: ratioDimension.height,
+                  zIndex: items.length);
+              items.add(newItem);
+              setState(() {
+                items = items;
+              });
+            },
+            icon: const Icon(Icons.add_photo_alternate)),
+        Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.rotationY(pi),
+          child: IconButton(
               onPressed: () async {
                 final File? res = await CustomImagePicker.pickMedia(
-                    isGallery: true, fixRatio: false);
+                    isGallery: false, fixRatio: false);
                 if (res == null) {
                   return;
                 }
@@ -113,6 +136,7 @@ class _PageEditPageState extends State<PageEditPage> {
                     pageId: widget.id,
                     type: PageItemType.IMAGE,
                     data: imageBytes,
+                    coordinates: const Point<double>(0.1, 0.1),
                     width: ratioDimension.width,
                     height: ratioDimension.height,
                     zIndex: items.length);
@@ -121,67 +145,145 @@ class _PageEditPageState extends State<PageEditPage> {
                   items = items;
                 });
               },
-              icon: const Icon(Icons.add_photo_alternate)),
-          Transform(
-            alignment: Alignment.center,
-            transform: Matrix4.rotationY(pi),
-            child: IconButton(
-                onPressed: () async {
-                  final File? res = await CustomImagePicker.pickMedia(
-                      isGallery: false, fixRatio: false);
-                  if (res == null) {
-                    return;
-                  }
-                  final imageBytes = await File(res.path).readAsBytes();
-                  final imageFile = await decodeImageFromList(imageBytes);
-
-                  final ratioDimension = dimensionToAllowedPercentage(Size(
-                      imageFile.width.toDouble(), imageFile.height.toDouble()));
-
-                  final newItem = PageItem(
-                      pageId: widget.id,
-                      type: PageItemType.IMAGE,
-                      data: imageBytes,
-                      width: ratioDimension.width,
-                      height: ratioDimension.height,
-                      zIndex: items.length);
-                  items.add(newItem);
-                  setState(() {
-                    items = items;
-                  });
-                },
-                icon: const Icon(Icons.add_a_photo)),
-          ),
-          IconButton(
-              onPressed: () {
-                final newItem = PageItem(
-                    pageId: widget.id,
-                    type: PageItemType.TEXTBOX,
-                    data: Uint8List.fromList(utf8.encode('')),
-                    width: 0.5,
-                    height: 0.5,
-                    zIndex: items.length);
-                items.add(newItem);
-                setState(() {
-                  items = items;
-                });
-              },
-              icon: const Icon(Icons.post_add_rounded)),
-        ],
-      ),
+              icon: const Icon(Icons.add_a_photo)),
+        ),
+        IconButton(
+            onPressed: () {
+              final newItem = PageItem(
+                  pageId: widget.id,
+                  type: PageItemType.TEXTBOX,
+                  data: Uint8List.fromList(utf8.encode('Type some text')),
+                  coordinates: const Point(0.1, 0.1),
+                  width: 0.5,
+                  height: 0.2,
+                  zIndex: items.length);
+              items.add(newItem);
+              setState(() {
+                items = items;
+              });
+            },
+            icon: const Icon(Icons.post_add_rounded)),
+      ],
     );
   }
 
-  Widget ToolBar() {
+  Widget ToolBar(BuildContext context) {
+    if (_selectedItem == null) {
+      return Container(
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 3,
+              blurRadius: 7,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: basicToolBar(context),
+      );
+    }
+
     switch (barSelection) {
       case ToolbarType.image:
-        return basicToolBar();
+        return Container(
+          constraints:
+              BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 3,
+                blurRadius: 7,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: basicToolBar(context),
+        );
       case ToolbarType.text:
-        return basicToolBar();
+        return Container(
+          constraints:
+              BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 3,
+                blurRadius: 7,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: basicToolBar(context),
+        );
       case ToolbarType.basic:
       default:
-        return basicToolBar();
+        return Container(
+          constraints:
+              BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 3,
+                blurRadius: 7,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: basicToolBar(context),
+        );
     }
+  }
+
+  Widget inputBar() {
+    if (_selectedItem == null) {
+      return const SizedBox(
+        width: 1,
+        height: 1,
+      );
+    }
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 3,
+            blurRadius: 7,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        child: TextFormField(
+          initialValue: utf8.decode(_selectedItem!.data),
+          decoration: InputDecoration(
+            hintText: 'Type here',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            isDense: true,
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+          ),
+          autofocus: true,
+          maxLines: 1,
+          onChanged: (text) {
+            _selectedItem!.data = Uint8List.fromList(utf8.encode(text));
+            setState(() {
+              items = items;
+            });
+          },
+        ),
+      ),
+    );
   }
 
   @override
@@ -231,8 +333,14 @@ class _PageEditPageState extends State<PageEditPage> {
             ],
           ),
           body: Stack(
+            alignment: Alignment.bottomCenter,
             children: [
               InteractiveViewer(
+                onInteractionStart: (details) {
+                  setState(() {
+                    _selectedItem = null;
+                  });
+                },
                 minScale: 0.6,
                 maxScale: 5,
                 boundaryMargin: const EdgeInsets.all(150),
@@ -257,51 +365,82 @@ class _PageEditPageState extends State<PageEditPage> {
                               ],
                             ),
                             clipBehavior: Clip.antiAlias,
-                            child: Center(
-                              child: Resizable(
-                                initialHeight: 200,
-                                initialWidth: 200,
-                                containerHeight: constraints.maxHeight,
-                                containerWidth: constraints.maxWidth,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.red,
-                                    borderRadius: BorderRadius.circular(15),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.5),
-                                        spreadRadius: 3,
-                                        blurRadius: 7,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Image.network(
-                                      'https://picsum.photos/250?image=9'),
-                                ),
-                              ),
+                            child: Stack(
+                              children: items.map((item) {
+                                final double left =
+                                    item.coordinates.x * constraints.maxWidth;
+                                final double top =
+                                    item.coordinates.y * constraints.maxHeight;
+                                final double height =
+                                    item.height * constraints.maxHeight;
+                                final double width =
+                                    item.width * constraints.maxWidth;
+
+                                final Widget itemWidget =
+                                    PageItemWidget(item, (text) {
+                                  item.data = Uint8List.fromList(
+                                      utf8.encode(text ?? ''));
+                                });
+
+                                if (item == _selectedItem) {
+                                  return Resizable(
+                                    child: itemWidget,
+                                    initialTop: top,
+                                    initialLeft: left,
+                                    initialHeight: height,
+                                    initialWidth: width,
+                                    isText: item.type == PageItemType.TEXTBOX,
+                                    onRelease: (Rect bound) {
+                                      item.width =
+                                          bound.width / constraints.maxWidth;
+                                      item.height =
+                                          bound.height / constraints.maxHeight;
+                                      final newX =
+                                          bound.left / constraints.maxWidth;
+                                      final newY =
+                                          bound.top / constraints.maxHeight;
+                                      item.coordinates = Point(newX, newY);
+                                      setState(() {
+                                        items = items;
+                                      });
+                                    },
+                                  );
+                                } else {
+                                  return Positioned(
+                                      top: top,
+                                      left: left,
+                                      child: SizedBox(
+                                        height: height,
+                                        width: width,
+                                        child: GestureDetector(
+                                          behavior: HitTestBehavior.opaque,
+                                          onTapDown: (details) {
+                                            setState(() {
+                                              _selectedItem = item;
+                                            });
+                                          },
+                                          child: item.type == PageItemType.IMAGE
+                                              ? FittedBox(
+                                                  child: itemWidget,
+                                                  fit: BoxFit.fill)
+                                              : itemWidget,
+                                        ),
+                                      ));
+                                }
+                              }).toList(),
                             ),
                           );
                         })),
                   ),
                 ),
               ),
-              ToolBar(),
-              //
-              // Testing code
-              // for (int i = 0; i < items.length; i++)
-              //   PageItemWidget(items[i], (text) {
-              //     items[i].data = Uint8List.fromList(utf8.encode(text ?? ''));
-              //   }),
-              // PageItemWidget(
-              //     PageItem(
-              //         pageId: widget.id,
-              //         type: PageItemType.TEXTBOX,
-              //         data: Uint8List.fromList(utf8.encode('testing')),
-              //         width: 0.5,
-              //         height: 0.5,
-              //         zIndex: 2),
-              //     (text) {})
+              Positioned(
+                top: 0,
+                child: ToolBar(context),
+              ),
+              if (_selectedItem != null &&
+                  _selectedItem!.type == PageItemType.TEXTBOX)
+                inputBar(),
             ],
           ),
         ));

@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 
+typedef ResizeReleaseCallback = void Function(Rect bound);
+
 class Resizable extends StatefulWidget {
+  final double initialTop;
+  final double initialLeft;
   final double initialHeight;
   final double initialWidth;
-  final double containerHeight;
-  final double containerWidth;
+  final ResizeReleaseCallback? onRelease;
+  final bool isText;
 
   const Resizable(
       {required this.child,
+      this.initialTop = 0,
+      this.initialLeft = 0,
       required this.initialHeight,
       required this.initialWidth,
-      required this.containerHeight,
-      required this.containerWidth,
+      this.onRelease,
+      this.isText = false,
       Key? key})
       : super(key: key);
 
@@ -21,20 +27,24 @@ class Resizable extends StatefulWidget {
 }
 
 class _ResizableState extends State<Resizable> {
-  static const minSize = ControlPoint.diameter * 3;
+  static const minSize = ControlPoint.diameter * 2;
 
   late double height;
   late double width;
 
-  double top = 0;
-  double left = 0;
+  late double top;
+  late double left;
 
-  double initX = 0;
-  double initY = 0;
+  late double initX;
+  late double initY;
 
   @override
   initState() {
     super.initState();
+    top = widget.initialTop;
+    left = widget.initialLeft;
+    initX = left;
+    initY = top;
     height = widget.initialHeight;
     width = widget.initialWidth;
   }
@@ -50,6 +60,7 @@ class _ResizableState extends State<Resizable> {
             height: height,
             width: width,
             child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onPanStart: (details) {
                   setState(() {
                     initX = details.localPosition.dx;
@@ -66,7 +77,13 @@ class _ResizableState extends State<Resizable> {
                     left = left + dx;
                   });
                 },
-                child: FittedBox(child: widget.child, fit: BoxFit.fill)),
+                onPanEnd: (details) {
+                  widget.onRelease
+                      ?.call(Rect.fromLTWH(left, top, width, height));
+                },
+                child: widget.isText
+                    ? widget.child
+                    : FittedBox(child: widget.child, fit: BoxFit.fill)),
           ),
         ),
         // top left
@@ -79,7 +96,7 @@ class _ResizableState extends State<Resizable> {
               double newHeight = height - offset;
               double newWidth = width - offset;
               if (newHeight <= minSize || newWidth <= minSize) return;
-              final mid = offset / 2;
+              final mid = dx + dy / 2;
 
               setState(() {
                 height = newHeight;
@@ -87,6 +104,9 @@ class _ResizableState extends State<Resizable> {
                 top = top + mid;
                 left = left + mid;
               });
+            },
+            onDragEnd: (details) {
+              widget.onRelease?.call(Rect.fromLTWH(left, top, width, height));
             },
             handlerWidget: HandlerWidget.DIAGONAL,
             padding: const EdgeInsets.only(
@@ -107,6 +127,9 @@ class _ResizableState extends State<Resizable> {
                 height = newHeight;
                 top = top + dy;
               });
+            },
+            onDragEnd: (details) {
+              widget.onRelease?.call(Rect.fromLTWH(left, top, width, height));
             },
             handlerWidget: HandlerWidget.AXIS,
             padding: const EdgeInsets.only(
@@ -134,6 +157,9 @@ class _ResizableState extends State<Resizable> {
                 left = left - mid;
               });
             },
+            onDragEnd: (details) {
+              widget.onRelease?.call(Rect.fromLTWH(left, top, width, height));
+            },
             handlerWidget: HandlerWidget.DIAGONAL,
             padding: const EdgeInsets.only(
                 top: ControlPoint.offset, right: ControlPoint.offset),
@@ -151,6 +177,9 @@ class _ResizableState extends State<Resizable> {
               setState(() {
                 width = newWidth;
               });
+            },
+            onDragEnd: (details) {
+              widget.onRelease?.call(Rect.fromLTWH(left, top, width, height));
             },
             handlerWidget: HandlerWidget.AXIS,
             padding: const EdgeInsets.only(
@@ -178,6 +207,9 @@ class _ResizableState extends State<Resizable> {
                 left = left - mid;
               });
             },
+            onDragEnd: (details) {
+              widget.onRelease?.call(Rect.fromLTWH(left, top, width, height));
+            },
             handlerWidget: HandlerWidget.DIAGONAL,
             padding: const EdgeInsets.only(
                 bottom: ControlPoint.offset, right: ControlPoint.offset),
@@ -199,6 +231,9 @@ class _ResizableState extends State<Resizable> {
               setState(() {
                 height = newHeight;
               });
+            },
+            onDragEnd: (details) {
+              widget.onRelease?.call(Rect.fromLTWH(left, top, width, height));
             },
             handlerWidget: HandlerWidget.AXIS,
             padding: const EdgeInsets.only(
@@ -226,6 +261,9 @@ class _ResizableState extends State<Resizable> {
                 left = left - mid;
               });
             },
+            onDragEnd: (details) {
+              widget.onRelease?.call(Rect.fromLTWH(left, top, width, height));
+            },
             handlerWidget: HandlerWidget.DIAGONAL,
             padding: const EdgeInsets.only(
                 bottom: ControlPoint.offset, left: ControlPoint.offset),
@@ -244,6 +282,9 @@ class _ResizableState extends State<Resizable> {
                 width = newWidth;
                 left = left + dx;
               });
+            },
+            onDragEnd: (details) {
+              widget.onRelease?.call(Rect.fromLTWH(left, top, width, height));
             },
             handlerWidget: HandlerWidget.AXIS,
             padding: const EdgeInsets.only(
@@ -264,11 +305,13 @@ class ControlPoint extends StatefulWidget {
   static const offset = 20.0;
 
   final ControlPointDragCallback onDrag;
+  final GestureDragEndCallback? onDragEnd;
   final HandlerWidget handlerWidget;
   final EdgeInsetsGeometry padding;
 
   const ControlPoint(
       {required this.onDrag,
+      this.onDragEnd,
       required this.handlerWidget,
       this.padding = EdgeInsetsDirectional.zero,
       Key? key})
@@ -301,6 +344,7 @@ class _ControlPointState extends State<ControlPoint> {
         initY = details.localPosition.dy;
         widget.onDrag(dx, dy);
       },
+      onPanEnd: widget.onDragEnd,
       behavior: HitTestBehavior.translucent,
       child: Padding(
         padding: widget.padding,

@@ -113,6 +113,7 @@ class PageItem {
     attributes['fontFamily'] = 'Merriweather';
     attributes['fontSize'] = '20';
     attributes['color'] = 'ff000000';
+    attributes['highlightColor'] = '00000000';
     attributes['backgroundColor'] = '00000000';
     final timestamp = DateTime.now();
     return PageItem._internal(

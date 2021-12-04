@@ -30,6 +30,9 @@ class _PageItemWidgetState extends State<PageItemWidget> {
   late Color fontColor = widget.item.attributes['color'] != null
       ? Color(int.parse(widget.item.attributes['color']!, radix: 16))
       : Colors.black;
+  late Color highlightColor = widget.item.attributes['highlightColor'] != null
+      ? Color(int.parse(widget.item.attributes['highlightColor']!, radix: 16))
+      : Colors.transparent;
   late Color backgroundColor = widget.item.attributes['backgroundColor'] != null
       ? Color(int.parse(widget.item.attributes['backgroundColor']!, radix: 16))
       : Colors.transparent;
@@ -43,7 +46,7 @@ class _PageItemWidgetState extends State<PageItemWidget> {
           decoration: underline ? TextDecoration.underline : null,
           fontWeight: bold ? FontWeight.w500 : FontWeight.normal,
           color: fontColor,
-          backgroundColor: backgroundColor,
+          backgroundColor: highlightColor,
         );
     }
   }
@@ -53,13 +56,11 @@ class _PageItemWidgetState extends State<PageItemWidget> {
     if (widget.item.type == PageItemType.IMAGE) {
       return Image.memory(widget.item.data);
     } else {
-      return TextFormField(
-        initialValue: utf8.decode(widget.item.data),
-        decoration:
-            const InputDecoration.collapsed(hintText: 'Enter Some Text'),
-        maxLines: null,
-        style: itemStyle(),
-        onChanged: widget.onTextChange,
+      return Container(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+        ),
+        child: Text(utf8.decode(widget.item.data), style: itemStyle()),
       );
     }
   }
