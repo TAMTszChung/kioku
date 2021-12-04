@@ -29,6 +29,9 @@ class _ResizableState extends State<Resizable> {
   double top = 0;
   double left = 0;
 
+  double initX = 0;
+  double initY = 0;
+
   @override
   initState() {
     super.initState();
@@ -39,29 +42,37 @@ class _ResizableState extends State<Resizable> {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      clipBehavior: Clip.none,
       children: <Widget>[
         Positioned(
           top: top,
           left: left,
-          child: Container(
+          child: SizedBox(
             height: height,
             width: width,
-            decoration: BoxDecoration(
-              color: Colors.blueGrey,
-              border: Border.all(
-                width: 2,
-                color: Colors.white70,
-              ),
-              borderRadius: BorderRadius.circular(0.0),
-            ),
-            child: FittedBox(child: widget.child, fit: BoxFit.fill),
+            child: GestureDetector(
+                onPanStart: (details) {
+                  setState(() {
+                    initX = details.localPosition.dx;
+                    initY = details.localPosition.dy;
+                  });
+                },
+                onPanUpdate: (details) {
+                  final double dx = details.localPosition.dx - initX;
+                  final double dy = details.localPosition.dy - initY;
+                  setState(() {
+                    initX = details.localPosition.dx;
+                    initY = details.localPosition.dy;
+                    top = top + dy;
+                    left = left + dx;
+                  });
+                },
+                child: FittedBox(child: widget.child, fit: BoxFit.fill)),
           ),
         ),
         // top left
         Positioned(
-          top: top - ControlPoint.offset,
-          left: left - ControlPoint.offset,
+          top: top - (ControlPoint.diameter + ControlPoint.offset),
+          left: left - (ControlPoint.diameter + ControlPoint.offset),
           child: ControlPoint(
             onDrag: (dx, dy) {
               double offset = dx + dy;
@@ -78,12 +89,15 @@ class _ResizableState extends State<Resizable> {
               });
             },
             handlerWidget: HandlerWidget.DIAGONAL,
+            padding: const EdgeInsets.only(
+                top: ControlPoint.offset, left: ControlPoint.offset),
           ),
         ),
-        // top middle
+        // top center
         Positioned(
-          top: top - ControlPoint.offset,
-          left: left + width / 2 - ControlPoint.offset,
+          top: top - (ControlPoint.diameter + ControlPoint.offset),
+          left:
+              left + (width - ControlPoint.diameter - ControlPoint.offset) / 2,
           child: ControlPoint(
             onDrag: (dx, dy) {
               double newHeight = height - dy;
@@ -95,12 +109,16 @@ class _ResizableState extends State<Resizable> {
               });
             },
             handlerWidget: HandlerWidget.AXIS,
+            padding: const EdgeInsets.only(
+                top: ControlPoint.offset,
+                left: ControlPoint.offset / 2,
+                right: ControlPoint.offset / 2),
           ),
         ),
         // top right
         Positioned(
-          top: top - ControlPoint.offset,
-          left: left + width - ControlPoint.offset,
+          top: top - (ControlPoint.diameter + ControlPoint.offset),
+          left: left + width,
           child: ControlPoint(
             onDrag: (dx, dy) {
               double offset = dx + -dy;
@@ -117,12 +135,14 @@ class _ResizableState extends State<Resizable> {
               });
             },
             handlerWidget: HandlerWidget.DIAGONAL,
+            padding: const EdgeInsets.only(
+                top: ControlPoint.offset, right: ControlPoint.offset),
           ),
         ),
         // center right
         Positioned(
-          top: top + height / 2 - ControlPoint.offset,
-          left: left + width - ControlPoint.offset,
+          top: top + (height - ControlPoint.diameter - ControlPoint.offset) / 2,
+          left: left + width,
           child: ControlPoint(
             onDrag: (dx, dy) {
               double newWidth = width + dx;
@@ -133,12 +153,16 @@ class _ResizableState extends State<Resizable> {
               });
             },
             handlerWidget: HandlerWidget.AXIS,
+            padding: const EdgeInsets.only(
+                right: ControlPoint.offset,
+                top: ControlPoint.offset / 2,
+                bottom: ControlPoint.offset / 2),
           ),
         ),
         // bottom right
         Positioned(
-          top: top + height - ControlPoint.offset,
-          left: left + width - ControlPoint.offset,
+          top: top + height,
+          left: left + width,
           child: ControlPoint(
             onDrag: (dx, dy) {
               double offset = dx + dy;
@@ -155,12 +179,15 @@ class _ResizableState extends State<Resizable> {
               });
             },
             handlerWidget: HandlerWidget.DIAGONAL,
+            padding: const EdgeInsets.only(
+                bottom: ControlPoint.offset, right: ControlPoint.offset),
           ),
         ),
         // bottom center
         Positioned(
-          top: top + height - ControlPoint.offset,
-          left: left + width / 2 - ControlPoint.offset,
+          top: top + height,
+          left:
+              left + (width - ControlPoint.diameter - ControlPoint.offset) / 2,
           child: ControlPoint(
             onDrag: (dx, dy) {
               double newHeight = height + dy;
@@ -174,12 +201,16 @@ class _ResizableState extends State<Resizable> {
               });
             },
             handlerWidget: HandlerWidget.AXIS,
+            padding: const EdgeInsets.only(
+                bottom: ControlPoint.offset,
+                left: ControlPoint.offset / 2,
+                right: ControlPoint.offset / 2),
           ),
         ),
         // bottom left
         Positioned(
-          top: top + height - ControlPoint.offset,
-          left: left - ControlPoint.offset,
+          top: top + height,
+          left: left - (ControlPoint.diameter + ControlPoint.offset),
           child: ControlPoint(
             onDrag: (dx, dy) {
               double offset = -dx + dy;
@@ -196,12 +227,14 @@ class _ResizableState extends State<Resizable> {
               });
             },
             handlerWidget: HandlerWidget.DIAGONAL,
+            padding: const EdgeInsets.only(
+                bottom: ControlPoint.offset, left: ControlPoint.offset),
           ),
         ),
         // left center
         Positioned(
-          top: top + height / 2 - ControlPoint.offset,
-          left: left - ControlPoint.offset,
+          top: top + (height - ControlPoint.diameter - ControlPoint.offset) / 2,
+          left: left - ControlPoint.diameter - ControlPoint.offset,
           child: ControlPoint(
             onDrag: (dx, dy) {
               double newWidth = width - dx;
@@ -213,20 +246,10 @@ class _ResizableState extends State<Resizable> {
               });
             },
             handlerWidget: HandlerWidget.AXIS,
-          ),
-        ),
-        // center center
-        Positioned(
-          top: top + height / 2 - ControlPoint.offset,
-          left: left + width / 2 - ControlPoint.offset,
-          child: ControlPoint(
-            onDrag: (dx, dy) {
-              setState(() {
-                top = top + dy;
-                left = left + dx;
-              });
-            },
-            handlerWidget: HandlerWidget.FREE,
+            padding: const EdgeInsets.only(
+                left: ControlPoint.offset,
+                top: ControlPoint.offset / 2,
+                bottom: ControlPoint.offset / 2),
           ),
         ),
       ],
@@ -238,14 +261,17 @@ typedef ControlPointDragCallback = void Function(double dx, double dy);
 
 class ControlPoint extends StatefulWidget {
   static const diameter = 15.0;
-  static const padding = 20.0;
-  static double get offset => diameter / 2 + padding;
+  static const offset = 20.0;
 
   final ControlPointDragCallback onDrag;
   final HandlerWidget handlerWidget;
+  final EdgeInsetsGeometry padding;
 
   const ControlPoint(
-      {required this.onDrag, required this.handlerWidget, Key? key})
+      {required this.onDrag,
+      required this.handlerWidget,
+      this.padding = EdgeInsetsDirectional.zero,
+      Key? key})
       : super(key: key);
 
   @override
@@ -253,7 +279,7 @@ class ControlPoint extends StatefulWidget {
 }
 
 // ignore: constant_identifier_names
-enum HandlerWidget { FREE, AXIS, DIAGONAL }
+enum HandlerWidget { AXIS, DIAGONAL }
 
 class _ControlPointState extends State<ControlPoint> {
   late double initX;
@@ -277,7 +303,7 @@ class _ControlPointState extends State<ControlPoint> {
       },
       behavior: HitTestBehavior.translucent,
       child: Padding(
-        padding: const EdgeInsets.all(ControlPoint.padding),
+        padding: widget.padding,
         child: Container(
           width: ControlPoint.diameter,
           height: ControlPoint.diameter,

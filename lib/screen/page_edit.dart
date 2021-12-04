@@ -61,6 +61,7 @@ class _PageEditPageState extends State<PageEditPage> {
                                 ),
                               ],
                             ),
+                            clipBehavior: Clip.antiAlias,
                             child: Center(
                               child: Resizable(
                                 initialHeight: 200,
