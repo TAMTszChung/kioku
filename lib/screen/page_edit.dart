@@ -28,12 +28,11 @@ class PageEditPage extends StatefulWidget {
 
 class _PageEditPageState extends State<PageEditPage> {
   bool saving = false;
-  ToolbarType barSelection = ToolbarType.basic;
 
   late BookPage page;
   late List<PageItem> items;
 
-  PageItem? _selectedItem = null;
+  PageItem? _selectedItem;
 
   @override
   void initState() {
@@ -62,7 +61,56 @@ class _PageEditPageState extends State<PageEditPage> {
     }
   }
 
-  Widget basicToolBar(BuildContext context) {
+  Widget toBackButton() {
+    return IconButton(
+        onPressed: (items.length == 1 || items.indexOf(_selectedItem!) == 0)
+            ? null
+            : () {
+                final itemIndex = items.indexOf(_selectedItem!);
+                if (itemIndex == 0) return;
+
+                PageItem temp = items[itemIndex - 1];
+                items[itemIndex - 1] = _selectedItem!;
+                items[itemIndex] = temp;
+                setState(() {
+                  items = items;
+                });
+              },
+        icon: const Icon(Icons.flip_to_back));
+  }
+
+  Widget toFrontButton() {
+    return IconButton(
+        onPressed: (items.length == 1 ||
+                items.indexOf(_selectedItem!) == items.length - 1)
+            ? null
+            : () {
+                final itemIndex = items.indexOf(_selectedItem!);
+                if (itemIndex == items.length - 1) return;
+
+                PageItem temp = items[itemIndex + 1];
+                items[itemIndex + 1] = _selectedItem!;
+                items[itemIndex] = temp;
+                setState(() {
+                  items = items;
+                });
+              },
+        icon: const Icon(Icons.flip_to_front));
+  }
+
+  Widget deleteButton() {
+    return IconButton(
+        onPressed: () {
+          items.removeWhere((item) => item == _selectedItem);
+          setState(() {
+            _selectedItem = null;
+            items = items;
+          });
+        },
+        icon: const Icon(Icons.delete_forever));
+  }
+
+  Widget basicToolBar() {
     return Wrap(
       children: [
         IconButton(
@@ -167,6 +215,26 @@ class _PageEditPageState extends State<PageEditPage> {
     );
   }
 
+  Widget imageToolBar() {
+    return Wrap(
+      children: [
+        toBackButton(),
+        toFrontButton(),
+        deleteButton(),
+      ],
+    );
+  }
+
+  Widget textToolBar() {
+    return Wrap(
+      children: [
+        toBackButton(),
+        toFrontButton(),
+        deleteButton(),
+      ],
+    );
+  }
+
   Widget ToolBar(BuildContext context) {
     if (_selectedItem == null) {
       return Container(
@@ -183,64 +251,63 @@ class _PageEditPageState extends State<PageEditPage> {
             ),
           ],
         ),
-        child: basicToolBar(context),
+        child: basicToolBar(),
       );
     }
 
-    switch (barSelection) {
-      case ToolbarType.image:
-        return Container(
-          constraints:
-              BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
-                spreadRadius: 3,
-                blurRadius: 7,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: basicToolBar(context),
-        );
-      case ToolbarType.text:
-        return Container(
-          constraints:
-              BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
-                spreadRadius: 3,
-                blurRadius: 7,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: basicToolBar(context),
-        );
-      case ToolbarType.basic:
-      default:
-        return Container(
-          constraints:
-              BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
-                spreadRadius: 3,
-                blurRadius: 7,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: basicToolBar(context),
-        );
+    if (_selectedItem!.type == PageItemType.IMAGE) {
+      return Container(
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 3,
+              blurRadius: 7,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: imageToolBar(),
+      );
     }
+
+    if (_selectedItem!.type == PageItemType.TEXTBOX) {
+      return Container(
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 3,
+              blurRadius: 7,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: textToolBar(),
+      );
+    }
+
+    return Container(
+      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 3,
+            blurRadius: 7,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: basicToolBar(),
+    );
   }
 
   Widget inputBar() {

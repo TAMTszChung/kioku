@@ -101,8 +101,20 @@ class PageItemProvider extends DataProvider {
   }
 
   Future<List<PageItem>> setAll(List<PageItem> listToSet) async {
+    if (listToSet.isEmpty) return const [];
+    final pageId = listToSet.first.pageId;
+    if (listToSet.any((item) => item.pageId != pageId)) {
+      throw ArgumentError('All items must have identical pageId', 'listToSet');
+    }
     final db = await DBHelper.instance.db;
     final batch = db.batch();
+    final itemsToDelete = _items.where((oldItem) =>
+        oldItem.pageId == pageId &&
+        listToSet.singleWhereOrNull((item) => item.id == oldItem.id) == null);
+    for (var item in itemsToDelete) {
+      batch.delete(tableName,
+          where: '${PageItemModel.id} = ?', whereArgs: [item.id]);
+    }
     final itemsToUpdate = listToSet.where((item) {
       if (item.id == null) return false;
       final oldItem = _items.singleWhere((oldItem) => oldItem.id == item.id);

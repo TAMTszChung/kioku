@@ -121,8 +121,20 @@ class BookPageProvider extends DataProvider {
   }
 
   Future<List<BookPage>> setAll(List<BookPage> listToSet) async {
+    if (listToSet.isEmpty) return const [];
+    final bookId = listToSet.first.bookId;
+    if (listToSet.any((item) => item.bookId != bookId)) {
+      throw ArgumentError('All pages must have identical bookId', 'listToSet');
+    }
     final db = await DBHelper.instance.db;
     final batch = db.batch();
+    final pagesToDelete = _pages.where((oldPage) =>
+        oldPage.bookId == bookId &&
+        listToSet.singleWhereOrNull((page) => page.id == oldPage.id) == null);
+    for (var page in pagesToDelete) {
+      batch.delete(tableName,
+          where: '${BookPageModel.id} = ?', whereArgs: [page.id]);
+    }
     final pagesToUpdate = listToSet.where((page) {
       if (page.id == null) return false;
       final oldPage = _pages.singleWhere((oldPage) => oldPage.id == page.id);
