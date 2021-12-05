@@ -3,6 +3,7 @@ import 'package:kioku/component/organism/book_cardview.dart';
 import 'package:kioku/component/organism/book_listview.dart';
 import 'package:kioku/component/organism/book_pageview.dart';
 import 'package:kioku/model/book_page.dart';
+import 'package:kioku/model/page_item.dart';
 import 'package:kioku/provider/book.dart';
 import 'package:kioku/provider/book_page.dart';
 import 'package:provider/provider.dart';
@@ -20,13 +21,14 @@ class BookOverview extends StatefulWidget {
 class _BookOverviewState extends State<BookOverview> {
   String _viewMode = 'Book';
   bool addingPage = false;
+  String _selectedCategory = 'All';
 
   Widget showSubView() {
     switch (_viewMode) {
       case 'List':
-        return BookListView(widget.id);
+        return BookListView(widget.id, _selectedCategory);
       case 'Card':
-        return BookCardView(widget.id);
+        return BookCardView(widget.id, _selectedCategory);
       case 'Book':
       default:
         return BookPageView(widget.id);
@@ -56,6 +58,44 @@ class _BookOverviewState extends State<BookOverview> {
                         });
                       },
                 icon: const Icon(Icons.add)),
+          if (_viewMode != 'Book')
+            PopupMenuButton<String>(
+              icon: _selectedCategory == 'All'
+                  ? const Icon(
+                      Icons.filter_alt_outlined,
+                      color: Colors.black,
+                    )
+                  : const Icon(
+                      Icons.filter_alt,
+                      color: Colors.black,
+                    ),
+              onSelected: (String result) {
+                setState(() {
+                  _selectedCategory = result;
+                });
+              },
+              itemBuilder: (BuildContext context) {
+                return [
+                  const PopupMenuItem<String>(
+                    value: 'Filter By Category',
+                    child: Text('Filter By Category'),
+                    enabled: false,
+                  ),
+                  const PopupMenuDivider(
+                    height: 1,
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'All',
+                    child: Text('All'),
+                  ),
+                  ...PageItem.categoryList
+                      .map((category) => PopupMenuItem<String>(
+                            value: category,
+                            child: Text(category),
+                          ))
+                ];
+              },
+            ),
           PopupMenuButton<String>(
             icon: const Icon(
               Icons.dashboard_rounded,

@@ -8,8 +8,9 @@ import 'package:provider/provider.dart';
 
 class BookCardView extends StatelessWidget {
   final int id;
+  final String category;
 
-  const BookCardView(this.id, {Key? key}) : super(key: key);
+  const BookCardView(this.id, this.category, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +24,14 @@ class BookCardView extends StatelessWidget {
         .map((item) => item.copy())
         .toList();
 
+    if (category != 'All') {
+      imageItems.removeWhere((item) => !item.categories.contains(category));
+    }
+
     if (imageItems.isEmpty) {
       return const Center(
           child: Text(
-        'There is no image items in this book!\n\nTo create items, add images in book pages.',
+        'There is no image items in this book or category!',
         textAlign: TextAlign.center,
       ));
     }
