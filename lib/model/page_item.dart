@@ -111,7 +111,7 @@ class PageItem {
     attributes['italic'] = 'false';
     attributes['bold'] = 'false';
     attributes['fontFamily'] = 'Merriweather';
-    attributes['fontSize'] = '20';
+    attributes['fontSize'] = '12.0';
     attributes['color'] = 'ff000000';
     attributes['highlightColor'] = '00000000';
     attributes['backgroundColor'] = '00000000';
