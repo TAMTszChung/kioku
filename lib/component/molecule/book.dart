@@ -56,8 +56,8 @@ class BookWidget extends StatelessWidget {
                     decoration: const BoxDecoration(
                       color: Colors.white70,
                     ),
-                    constraints:
-                        BoxConstraints(minHeight: 10, maxHeight: fontSize * 3),
+                    constraints: BoxConstraints(
+                        minHeight: 10, maxHeight: fontSize * 3.5),
                     width: double.infinity,
                     child: Center(
                       child: Text(

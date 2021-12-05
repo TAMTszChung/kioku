@@ -7,6 +7,7 @@ import 'package:kioku/screen/book_overview.dart';
 import 'package:kioku/screen/book_slideshow.dart';
 import 'package:kioku/screen/cover_edit.dart';
 import 'package:kioku/screen/home.dart';
+import 'package:kioku/screen/item_detail.dart';
 import 'package:kioku/screen/page_edit.dart';
 import 'package:kioku/screen/search.dart';
 import 'package:kioku/screen/share.dart';
@@ -48,6 +49,11 @@ class MyApp extends StatelessWidget {
           onGenerateRoute: (settings) {
             final args = settings.arguments;
             switch (settings.name) {
+              case '/item_detail':
+                if (args is! int) return null;
+                return MaterialPageRoute(builder: (context) {
+                  return ItemDetailScreen(args);
+                });
               case '/book_slideshow':
                 if (args is! int && args is! Iterable<int>) return null;
                 return MaterialPageRoute(builder: (context) {

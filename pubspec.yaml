@@ -43,6 +43,7 @@ dependencies:
   image_cropper: ^1.4.1
   carousel_slider: ^4.0.0
   google_fonts: ^2.1.0
+  flutter_form_builder: ^7.0.0
 
 dev_dependencies:
   flutter_test:

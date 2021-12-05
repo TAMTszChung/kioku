@@ -16,6 +16,7 @@ class ImageItemCard extends StatelessWidget {
           splashColor: Colors.blue,
           onTap: () {
             //TODO: navigate to detail page;
+            Navigator.pushNamed(context, '/item_detail', arguments: item.id);
           },
           child: Container(
             color:

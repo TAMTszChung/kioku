@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
                     return null;
                   },
-                  maxLength: 35,
+                  maxLength: Book.titleLengthLimit,
                 );
 
                 if (result != null) {
