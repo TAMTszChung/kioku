@@ -91,18 +91,32 @@ class _ResizableState extends State<Resizable> {
           top: top - (ControlPoint.diameter + ControlPoint.offset),
           left: left - (ControlPoint.diameter + ControlPoint.offset),
           child: ControlPoint(
-            onDrag: (dx, dy) {
-              double offset = dx + dy;
-              double newHeight = height - offset;
-              double newWidth = width - offset;
-              if (newHeight <= minSize || newWidth <= minSize) return;
-              final mid = dx + dy / 2;
-
+            onDragStart: () {
               setState(() {
+                initX = width;
+                initY = height;
+              });
+            },
+            onDrag: (dx, dy) {
+              initX -= dx;
+              initY -= dy;
+              double newWidth = initX;
+              double newHeight = initY;
+              final itemRatio = width / height;
+              final pointerRatio = initX / initY;
+              if (pointerRatio > itemRatio) {
+                newHeight = newWidth / itemRatio;
+              } else if (pointerRatio < itemRatio) {
+                newWidth = newHeight * itemRatio;
+              }
+              if (newHeight <= minSize || newWidth <= minSize) return;
+              setState(() {
+                initX = initX;
+                initY = initY;
+                top = top - (newHeight - height);
+                left = left - (newWidth - width);
                 height = newHeight;
                 width = newWidth;
-                top = top + mid;
-                left = left + mid;
               });
             },
             onDragEnd: (details) {
@@ -143,18 +157,31 @@ class _ResizableState extends State<Resizable> {
           top: top - (ControlPoint.diameter + ControlPoint.offset),
           left: left + width,
           child: ControlPoint(
-            onDrag: (dx, dy) {
-              double offset = dx + -dy;
-              double newHeight = height + offset;
-              double newWidth = width + offset;
-              if (newHeight <= minSize || newWidth <= minSize) return;
-              final mid = offset / 2;
-
+            onDragStart: () {
               setState(() {
+                initX = width;
+                initY = height;
+              });
+            },
+            onDrag: (dx, dy) {
+              initX += dx;
+              initY -= dy;
+              double newWidth = initX;
+              double newHeight = initY;
+              final itemRatio = width / height;
+              final pointerRatio = initX / initY;
+              if (pointerRatio > itemRatio) {
+                newHeight = newWidth / itemRatio;
+              } else if (pointerRatio < itemRatio) {
+                newWidth = newHeight * itemRatio;
+              }
+              if (newHeight <= minSize || newWidth <= minSize) return;
+              setState(() {
+                initX = initX;
+                initY = initY;
+                top = top - (newHeight - height);
                 height = newHeight;
                 width = newWidth;
-                top = top - mid;
-                left = left - mid;
               });
             },
             onDragEnd: (details) {
@@ -193,18 +220,30 @@ class _ResizableState extends State<Resizable> {
           top: top + height,
           left: left + width,
           child: ControlPoint(
-            onDrag: (dx, dy) {
-              double offset = dx + dy;
-              double newHeight = height + offset;
-              double newWidth = width + offset;
-              if (newHeight <= minSize || newWidth <= minSize) return;
-              final mid = offset / 2;
-
+            onDragStart: () {
               setState(() {
+                initX = width;
+                initY = height;
+              });
+            },
+            onDrag: (dx, dy) {
+              initX += dx;
+              initY += dy;
+              double newWidth = initX;
+              double newHeight = initY;
+              final itemRatio = width / height;
+              final pointerRatio = initX / initY;
+              if (pointerRatio > itemRatio) {
+                newHeight = newWidth / itemRatio;
+              } else if (pointerRatio < itemRatio) {
+                newWidth = newHeight * itemRatio;
+              }
+              if (newHeight <= minSize || newWidth <= minSize) return;
+              setState(() {
+                initX = initX;
+                initY = initY;
                 height = newHeight;
                 width = newWidth;
-                top = top - mid;
-                left = left - mid;
               });
             },
             onDragEnd: (details) {
@@ -247,18 +286,31 @@ class _ResizableState extends State<Resizable> {
           top: top + height,
           left: left - (ControlPoint.diameter + ControlPoint.offset),
           child: ControlPoint(
-            onDrag: (dx, dy) {
-              double offset = -dx + dy;
-              double newHeight = height + offset;
-              double newWidth = width + offset;
-              if (newHeight <= minSize || newWidth <= minSize) return;
-              final mid = offset / 2;
-
+            onDragStart: () {
               setState(() {
+                initX = width;
+                initY = height;
+              });
+            },
+            onDrag: (dx, dy) {
+              initX -= dx;
+              initY += dy;
+              double newWidth = initX;
+              double newHeight = initY;
+              final itemRatio = width / height;
+              final pointerRatio = initX / initY;
+              if (pointerRatio > itemRatio) {
+                newHeight = newWidth / itemRatio;
+              } else if (pointerRatio < itemRatio) {
+                newWidth = newHeight * itemRatio;
+              }
+              if (newHeight <= minSize || newWidth <= minSize) return;
+              setState(() {
+                initX = initX;
+                initY = initY;
+                left = left - (newWidth - width);
                 height = newHeight;
                 width = newWidth;
-                top = top - mid;
-                left = left - mid;
               });
             },
             onDragEnd: (details) {
@@ -304,6 +356,7 @@ class ControlPoint extends StatefulWidget {
   static const diameter = 15.0;
   static const offset = 20.0;
 
+  final Function? onDragStart;
   final ControlPointDragCallback onDrag;
   final GestureDragEndCallback? onDragEnd;
   final HandlerWidget handlerWidget;
@@ -311,6 +364,7 @@ class ControlPoint extends StatefulWidget {
 
   const ControlPoint(
       {required this.onDrag,
+      this.onDragStart,
       this.onDragEnd,
       required this.handlerWidget,
       this.padding = EdgeInsetsDirectional.zero,
@@ -336,6 +390,7 @@ class _ControlPointState extends State<ControlPoint> {
           initX = details.localPosition.dx;
           initY = details.localPosition.dy;
         });
+        widget.onDragStart?.call();
       },
       onPanUpdate: (details) {
         final double dx = details.localPosition.dx - initX;
