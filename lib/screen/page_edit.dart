@@ -659,7 +659,6 @@ class _PageEditPageState extends State<PageEditPage> {
     return WillPopScope(
         //-------------------------- Perform Exit Check -----------------------
         onWillPop: () async {
-          // TODO: show confirm dialog telling user they will discard all the changes
           final res = await showDialog(
               context: context,
               builder: (BuildContext context) {
@@ -726,6 +725,7 @@ class _PageEditPageState extends State<PageEditPage> {
                               .update(newPage);
                           Navigator.pop(context);
                         });
+                        //TODO: Update book last update time
                       },
                       child: const Text('Save'))
             ],

@@ -34,7 +34,7 @@ class PageItemModel extends BaseModel {
           DBCol(name: type, type: DBType.text(notNull: true)),
           DBCol(name: data, type: DBType.blob(notNull: true)),
           DBCol(name: attributes, type: DBType.text(notNull: true)),
-          DBCol(name: categories, type: DBType.text()),
+          DBCol(name: categories, type: DBType.text(notNull: true)),
           DBCol(name: coordinateX, type: DBType.real(notNull: true)),
           DBCol(name: coordinateY, type: DBType.real(notNull: true)),
           DBCol(name: width, type: DBType.real(notNull: true)),
@@ -68,7 +68,7 @@ class PageItem {
   PageItemType type; // type
   Uint8List data; // data in bytes
   Map<String, String> attributes; // attributes of data
-  List<String>? categories; // categories
+  List<String> categories; // categories
   Point<double> coordinates; // coordinates (x, y are in percent)
   double width; // width (in percent)
   double height; // height (in percent)
@@ -78,6 +78,28 @@ class PageItem {
   final DateTime createTime; // create time from database
   DateTime lastModifiedTime; // last modified time from database
 
+  static const List<String> categoryList = [
+    'Anime',
+    'Baby',
+    'Book',
+    'Design',
+    'Education',
+    'Fashion',
+    'Finance',
+    'Food & Drink',
+    'Hobbies',
+    'Holiday',
+    'Home',
+    'Jewelry',
+    'Lifestyle',
+    'Media',
+    'Music',
+    'People',
+    'Sports',
+    'Tech',
+    'Travel'
+  ];
+
   PageItem._internal(
       {this.id,
       required this.pageId,
@@ -85,7 +107,7 @@ class PageItem {
       required this.type,
       required this.data,
       required this.attributes,
-      this.categories,
+      this.categories = const [],
       required this.coordinates,
       required this.width,
       required this.height,
@@ -140,11 +162,8 @@ class PageItem {
       if (value is! String?) return value.toString();
       return value;
     }));
-    List<String>? categories;
-    final categoriesStr = json[PageItemModel.categories] as String?;
-    if (categoriesStr != null) {
-      categories = categoriesStr.split(',');
-    }
+    final categoriesStr = json[PageItemModel.categories] as String;
+    List<String> categories = categoriesStr.split(',');
     int? datetimeVal = json[PageItemModel.datetime] as int?;
     DateTime? datetime = datetimeVal != null
         ? DateTime.fromMillisecondsSinceEpoch(datetimeVal)
@@ -183,6 +202,7 @@ class PageItem {
     double? height,
     double? rotation,
     int? zIndex,
+    DateTime? datetime,
     DateTime? createTime,
     DateTime? lastModifiedTime,
     required PageItem original,
@@ -194,15 +214,13 @@ class PageItem {
         type: type ?? original.type,
         data: data ?? original.data,
         attributes: attributes ?? Map.from(original.attributes),
-        categories: categories ??
-            (original.categories != null
-                ? List.from(original.categories!)
-                : null),
+        categories: categories ?? List.from(original.categories),
         coordinates: coordinates ?? original.coordinates,
         width: width ?? original.width,
         height: height ?? original.height,
         rotation: rotation ?? original.rotation,
         zIndex: zIndex ?? original.zIndex,
+        datetime: datetime ?? original.datetime,
         createTime: createTime ?? original.createTime,
         lastModifiedTime: lastModifiedTime ?? original.lastModifiedTime);
   }
@@ -219,6 +237,7 @@ class PageItem {
     double? height,
     double? rotation,
     int? zIndex,
+    DateTime? datetime,
     DateTime? lastModifiedTime,
   }) {
     return PageItem._copy(
@@ -233,6 +252,7 @@ class PageItem {
         height: height,
         rotation: rotation,
         zIndex: zIndex,
+        datetime: datetime,
         lastModifiedTime: lastModifiedTime,
         original: this);
   }
@@ -244,13 +264,14 @@ class PageItem {
         PageItemModel.type: type.value,
         PageItemModel.data: data,
         PageItemModel.attributes: jsonEncode(attributes),
-        PageItemModel.categories: categories?.join(','),
+        PageItemModel.categories: categories.join(','),
         PageItemModel.coordinateX: coordinates.x,
         PageItemModel.coordinateY: coordinates.y,
         PageItemModel.width: width,
         PageItemModel.height: height,
         PageItemModel.rotation: rotation,
         PageItemModel.zIndex: zIndex,
+        PageItemModel.datetime: datetime?.millisecondsSinceEpoch,
         PageItemModel.createTime: createTime.millisecondsSinceEpoch,
         PageItemModel.lastModifiedTime: lastModifiedTime.millisecondsSinceEpoch,
       };

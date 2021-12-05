@@ -79,6 +79,14 @@ class PageItemProvider extends DataProvider {
     return updatedItem;
   }
 
+  Future<int?> delete(int id) async {
+    final db = await DBHelper.instance.db;
+    final count = await db
+        .delete(tableName, where: '${PageItemModel.id} = ?', whereArgs: [id]);
+    if (count != 1) return null;
+    return id;
+  }
+
   PageItem get(int id) {
     return _items.singleWhere((page) => page.id == id);
   }

@@ -97,6 +97,14 @@ class BookPageProvider extends DataProvider {
     return updatedPage;
   }
 
+  Future<int?> delete(int id) async {
+    final db = await DBHelper.instance.db;
+    final count = await db
+        .delete(tableName, where: '${BookPageModel.id} = ?', whereArgs: [id]);
+    if (count != 1) return null;
+    return id;
+  }
+
   BookPage get(int? id, {int? bookId, int? pageNumber}) {
     late final BookPage page;
     if (id != null) {

@@ -13,8 +13,7 @@ class ImageItemListTile extends StatelessWidget {
       child: InkWell(
         splashColor: Colors.blue,
         onTap: () {
-          //TODO: navigate to detail page;
-          Navigator.pushNamed(context, '/item_detail', arguments: item.id);
+          Navigator.pushNamed(context, '/item_detail', arguments: item);
         },
         child: Container(
           decoration: BoxDecoration(
@@ -30,11 +29,14 @@ class ImageItemListTile extends StatelessWidget {
           ),
           child: ListTile(
             leading: item.type == PageItemType.IMAGE
-                ? Image.memory(item.data)
+                ? AspectRatio(
+                    aspectRatio: 1,
+                    child: Image.memory(item.data),
+                  )
                 : null,
             title: Text(item.name ?? 'Untitled'),
             subtitle: item.categories != null
-                ? Text(item.categories!.join(', '))
+                ? Text(item.categories.join(', '))
                 : const Text(''),
           ),
         ),

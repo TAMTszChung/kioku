@@ -15,8 +15,7 @@ class ImageItemCard extends StatelessWidget {
         child: InkWell(
           splashColor: Colors.blue,
           onTap: () {
-            //TODO: navigate to detail page;
-            Navigator.pushNamed(context, '/item_detail', arguments: item.id);
+            Navigator.pushNamed(context, '/item_detail', arguments: item);
           },
           child: Container(
             color:
@@ -42,7 +41,7 @@ class ImageItemCard extends StatelessWidget {
                     ListTile(
                       title: Text(item.name ?? 'Untitled'),
                       subtitle: item.categories != null
-                          ? Text(item.categories!.join(', '))
+                          ? Text(item.categories.join(', '))
                           : const Text(''),
                     ),
                   ],

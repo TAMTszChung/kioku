@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:kioku/model/page_item.dart';
 import 'package:kioku/provider/book.dart';
 import 'package:kioku/provider/book_page.dart';
 import 'package:kioku/provider/page_item.dart';
@@ -50,7 +51,7 @@ class MyApp extends StatelessWidget {
             final args = settings.arguments;
             switch (settings.name) {
               case '/item_detail':
-                if (args is! int) return null;
+                if (args is! PageItem) return null;
                 return MaterialPageRoute(builder: (context) {
                   return ItemDetailScreen(args);
                 });

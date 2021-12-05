@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:kioku/model/page_item.dart';
+import 'package:kioku/provider/page_item.dart';
+import 'package:provider/provider.dart';
 
 class ItemDetailScreen extends StatefulWidget {
   static String nameField = 'name';
+  static String dateTimeField = 'dateTime';
+  static String categoryField = 'categories';
 
-  final int id;
-  const ItemDetailScreen(this.id, {Key? key}) : super(key: key);
+  final PageItem item;
+  const ItemDetailScreen(this.item, {Key? key}) : super(key: key);
 
   @override
   State<ItemDetailScreen> createState() => _ItemDetailScreenState();
@@ -13,14 +18,43 @@ class ItemDetailScreen extends StatefulWidget {
 
 class _ItemDetailScreenState extends State<ItemDetailScreen> {
   final _formKey = GlobalKey<FormBuilderState>();
+  bool saving = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Item Details'),
-        actions: const [
-          TextButton(onPressed: null, child: Text('Save')),
+        actions: [
+          TextButton(
+              onPressed: () async {
+                setState(() {
+                  saving = true;
+                });
+
+                final String? newName = _formKey
+                    .currentState!.fields[ItemDetailScreen.nameField]!.value;
+                final DateTime? newDateTime = _formKey.currentState!
+                    .fields[ItemDetailScreen.dateTimeField]!.value;
+                List<String> newCategories = widget.item.categories;
+                final List<String> formCategories = _formKey.currentState!
+                    .fields[ItemDetailScreen.categoryField]!.value;
+
+                if (formCategories is List<String>) {
+                  newCategories = formCategories;
+                  newCategories.removeWhere((element) => element.isEmpty);
+                  newCategories.sort(
+                      (a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+                }
+
+                await context.read<PageItemProvider>().update(widget.item.copy(
+                    name: newName,
+                    categories: newCategories,
+                    datetime: newDateTime));
+
+                Navigator.pop(context);
+              },
+              child: const Text('Save')),
         ],
       ),
       body: ListView(
@@ -34,13 +68,13 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
-                child: Image.network('https://picsum.photos/1980/1080'),
+                child: Image.memory(widget.item.data),
               ),
             ),
           ),
           // ------------------------- The Form ---------------------------
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 50, vertical: 30),
+            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
             child: FormBuilder(
               key: _formKey,
               autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -49,7 +83,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 children: [
                   FormBuilderTextField(
                     name: ItemDetailScreen.nameField,
-                    initialValue: 'Beach',
+                    initialValue: widget.item.name,
                     decoration: InputDecoration(
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10)),
@@ -62,67 +96,46 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 20),
                     child: FormBuilderDateTimePicker(
-                      name: 'date',
+                      name: ItemDetailScreen.dateTimeField,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10)),
                         labelText: 'Date & Time',
                       ),
-                      initialValue: DateTime.now(),
+                      initialValue: widget.item.datetime,
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 20),
                     child: FormBuilderFilterChip(
-                      name: 'categories',
+                      name: ItemDetailScreen.categoryField,
                       spacing: 5,
                       decoration: const InputDecoration(
                         border: InputBorder.none,
-                        labelText: 'Select many options',
+                        labelText: 'Choose item\'s categories',
                       ),
-                      options: const [
-                        FormBuilderFieldOption(
-                            value: 'Test', child: Text('Test')),
-                        FormBuilderFieldOption(
-                            value: 'Test 1', child: Text('Test 1')),
-                        FormBuilderFieldOption(
-                            value: 'Test 2', child: Text('Test 2')),
-                        FormBuilderFieldOption(
-                            value: 'Test 3', child: Text('Test 3')),
-                        FormBuilderFieldOption(
-                            value: 'Test 4', child: Text('Test 4')),
-                      ],
+                      options: PageItem.categoryList
+                          .map((category) => FormBuilderFieldOption(
+                              value: category, child: Text(category)))
+                          .toList(),
+                      initialValue: widget.item.categories,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: FormBuilderTextField(
-                      name: 'description',
-                      initialValue: 'No description',
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          labelText: 'Item Description',
-                          hintText: 'Enter Description'),
-                      onChanged: null,
-                      // valueTransformer: (text) => num.tryParse(text),
-                      validator: null,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: ElevatedButton(
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.all(5.0),
-                          primary: Colors.black,
-                          backgroundColor: Colors.blueAccent,
-                          textStyle: const TextStyle(fontSize: 16),
-                        ),
-                        onPressed: () {
-                          _formKey.currentState!.reset();
-                        },
-                        child: const Text('Reset')),
-                  ),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(top: 20),
+                  //   child: FormBuilderTextField(
+                  //     name: 'description',
+                  //     initialValue: 'No description',
+                  //     decoration: InputDecoration(
+                  //         border: OutlineInputBorder(
+                  //             borderRadius: BorderRadius.circular(10)),
+                  //         labelText: 'Item Description',
+                  //         hintText: 'Enter Description'),
+                  //     onChanged: null,
+                  //     // valueTransformer: (text) => num.tryParse(text),
+                  //     validator: null,
+                  //   ),
+                  // ),
                 ],
               ),
             ),
