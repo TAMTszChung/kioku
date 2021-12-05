@@ -397,25 +397,25 @@ class _PageEditPageState extends State<PageEditPage> {
     }
 
     List<double> sizes = [
-      8,
-      9,
-      10,
+      8.0,
+      9.0,
+      10.0,
       10.5,
-      11,
-      12,
-      14,
-      16,
-      18,
-      22,
-      24,
-      26,
-      28,
-      32,
-      36,
-      40,
-      44,
-      48,
-      72
+      11.0,
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      22.0,
+      24.0,
+      26.0,
+      28.0,
+      32.0,
+      36.0,
+      40.0,
+      44.0,
+      48.0,
+      72.0
     ];
     return DropdownButton<double>(
       value: originalFontSize,
@@ -429,7 +429,6 @@ class _PageEditPageState extends State<PageEditPage> {
       ),
       onChanged: (double? newValue) {
         if (newValue == null) return;
-        print(newValue.toString());
         _selectedItem!.attributes['fontSize'] = newValue.toString();
         setState(() {
           items = items;
@@ -711,25 +710,22 @@ class _PageEditPageState extends State<PageEditPage> {
                           copiedItems[i].zIndex = i;
                         }
 
-                        Uint8List? pageSnapshot;
-                        await _capturePng()
-                            .then((value) => pageSnapshot = value);
-                        final BookPage newPage =
-                            page.copy(thumbnail: pageSnapshot);
+                        await context
+                            .read<PageItemProvider>()
+                            .setAll(copiedItems);
 
-                        //TODO: remove this image convert testing code block
-                        // items[0].data = pageSnapshot!;
-                        // setState(() {
-                        //   items = items;
-                        //   saving = false;
-                        // });
-                        //TODO: use provider to update items and page
+                        await Future.delayed(Duration.zero, () async {
+                          Uint8List? pageSnapshot;
+                          await _capturePng()
+                              .then((value) => pageSnapshot = value);
+                          final BookPage newPage =
+                              page.copy(thumbnail: pageSnapshot);
 
-                        // await context
-                        //     .read<PageItemProvider>()
-                        //     .setAll(copiedItems);
-
-                        //Navigator.pop(context);
+                          await context
+                              .read<BookPageProvider>()
+                              .update(newPage);
+                          Navigator.pop(context);
+                        });
                       },
                       child: const Text('Save'))
             ],

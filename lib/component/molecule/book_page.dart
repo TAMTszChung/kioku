@@ -28,7 +28,7 @@ class BookPageWidget extends StatelessWidget {
           },
           child: Container(
               decoration: BoxDecoration(
-                color: page.thumbnail == null ? Colors.white : null,
+                color: page.color,
                 image: page.thumbnail != null
                     ? DecorationImage(
                         image: MemoryImage(page.thumbnail!),

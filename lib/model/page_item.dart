@@ -133,18 +133,29 @@ class PageItem {
   }
 
   factory PageItem.fromJson(Map<String, Object?> json) {
+    Map<String, String> attributes = Map.castFrom(jsonDecode(
+        json[PageItemModel.attributes] as String, reviver: (key, value) {
+      if (key == null) return value;
+      if (key is! String) throw Exception('JSON key must be string');
+      if (value is! String?) return value.toString();
+      return value;
+    }));
     List<String>? categories;
     final categoriesStr = json[PageItemModel.categories] as String?;
     if (categoriesStr != null) {
       categories = categoriesStr.split(',');
     }
+    int? datetimeVal = json[PageItemModel.datetime] as int?;
+    DateTime? datetime = datetimeVal != null
+        ? DateTime.fromMillisecondsSinceEpoch(datetimeVal)
+        : null;
     return PageItem._internal(
         id: json[PageItemModel.id] as int,
         pageId: json[PageItemModel.pageId] as int,
         name: json[PageItemModel.name] as String?,
-        type: json[PageItemModel.type] as PageItemType,
+        type: PageItemType(json[PageItemModel.type] as String),
         data: json[PageItemModel.data] as Uint8List,
-        attributes: jsonDecode(json[PageItemModel.attributes] as String),
+        attributes: attributes,
         categories: categories,
         coordinates: Point<double>(json[PageItemModel.coordinateX] as double,
             json[PageItemModel.coordinateY] as double),
@@ -152,8 +163,7 @@ class PageItem {
         height: json[PageItemModel.height] as double,
         rotation: json[PageItemModel.rotation] as double,
         zIndex: json[PageItemModel.zIndex] as int,
-        datetime: DateTime.fromMillisecondsSinceEpoch(
-            json[PageItemModel.datetime] as int),
+        datetime: datetime,
         createTime: DateTime.fromMillisecondsSinceEpoch(
             json[PageItemModel.createTime] as int),
         lastModifiedTime: DateTime.fromMillisecondsSinceEpoch(
@@ -231,7 +241,7 @@ class PageItem {
         PageItemModel.id: id,
         PageItemModel.pageId: pageId,
         PageItemModel.name: name,
-        PageItemModel.type: type,
+        PageItemModel.type: type.value,
         PageItemModel.data: data,
         PageItemModel.attributes: jsonEncode(attributes),
         PageItemModel.categories: categories?.join(','),
