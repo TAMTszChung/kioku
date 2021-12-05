@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
 
-Future<String?> showTextInputDialog(BuildContext context,
-    {required String title,
-    required String hintText,
-    required String okText,
-    required String cancelText,
-    required String? Function(String?) validator}) async {
+Future<String?> showTextInputDialog(
+  BuildContext context, {
+  required String title,
+  required String hintText,
+  required String okText,
+  required String cancelText,
+  required String? Function(String?) validator,
+  String? initValue,
+  String? helperText,
+  int? maxLength,
+}) async {
   return showDialog(
     context: context,
     builder: (context) {
       return _PromptDialog(
-          title: title,
-          hintText: hintText,
-          okText: okText,
-          cancelText: cancelText,
-          validator: validator);
+        title: title,
+        hintText: hintText,
+        okText: okText,
+        cancelText: cancelText,
+        validator: validator,
+        initValue: initValue,
+        helperText: helperText,
+        maxLength: maxLength,
+      );
     },
   );
 }
@@ -25,6 +34,9 @@ class _PromptDialog extends StatefulWidget {
   final String okText;
   final String cancelText;
   final String? Function(String?) validator;
+  final String? initValue;
+  final String? helperText;
+  final int? maxLength;
 
   const _PromptDialog(
       {Key? key,
@@ -32,7 +44,10 @@ class _PromptDialog extends StatefulWidget {
       required this.hintText,
       required this.okText,
       required this.cancelText,
-      required this.validator})
+      required this.validator,
+      this.initValue,
+      this.helperText,
+      this.maxLength})
       : super(key: key);
 
   @override
@@ -42,6 +57,12 @@ class _PromptDialog extends StatefulWidget {
 class _PromptDialogState extends State<_PromptDialog> {
   final TextEditingController _textFieldController = TextEditingController();
   String errorText = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _textFieldController.text = widget.initValue ?? '';
+  }
 
   @override
   void dispose() {
@@ -56,16 +77,27 @@ class _PromptDialogState extends State<_PromptDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          TextField(
+          TextFormField(
             controller: _textFieldController,
-            decoration: InputDecoration(hintText: widget.hintText),
+            maxLength: widget.maxLength,
+            decoration: InputDecoration(
+              helperText: widget.helperText,
+              hintText: widget.hintText,
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              isDense: true,
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+            ),
+            autofocus: true,
+            maxLines: 1,
           ),
           Visibility(
             child: Padding(
                 padding: const EdgeInsets.only(top: 20.0),
                 child: Text(
                   errorText,
-                  style: const TextStyle(color: Colors.red),
+                  style: const TextStyle(color: Colors.red, fontSize: 14),
                 )),
             visible: errorText.isNotEmpty,
           )

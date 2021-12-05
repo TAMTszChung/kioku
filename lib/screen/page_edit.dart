@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:kioku/component/atom/input_dialog.dart';
 import 'package:kioku/component/atom/resizable.dart';
 import 'package:kioku/component/molecule/custom_image_picker.dart';
 import 'package:kioku/component/molecule/page_item.dart';
@@ -61,6 +62,131 @@ class _PageEditPageState extends State<PageEditPage> {
     }
   }
 
+  Widget pageFillColorButton() {
+    return IconButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                content: SingleChildScrollView(
+                  child: HueRingPicker(
+                    pickerColor: page.color,
+                    onColorChanged: (Color newColor) {
+                      page.color = newColor;
+                      setState(() {
+                        page = page;
+                      });
+                    },
+                    enableAlpha: false,
+                    displayThumbColor: true,
+                  ),
+                ),
+              );
+            },
+          );
+        },
+        icon: const Icon(Icons.format_color_fill));
+  }
+
+  Widget chooseImageButton() {
+    return IconButton(
+        onPressed: () async {
+          final File? res = await CustomImagePicker.pickMedia(
+              isGallery: true, fixRatio: false);
+          if (res == null) {
+            return;
+          }
+          final imageBytes = await File(res.path).readAsBytes();
+          final imageFile = await decodeImageFromList(imageBytes);
+
+          final ratioDimension = dimensionToAllowedPercentage(
+              Size(imageFile.width.toDouble(), imageFile.height.toDouble()));
+
+          final newItem = PageItem(
+              pageId: widget.id,
+              type: PageItemType.IMAGE,
+              data: imageBytes,
+              coordinates: const Point(0.1, 0.1),
+              width: ratioDimension.width,
+              height: ratioDimension.height,
+              zIndex: items.length);
+          items.add(newItem);
+          setState(() {
+            items = items;
+          });
+        },
+        icon: const Icon(Icons.add_photo_alternate));
+  }
+
+  Widget takePhotoButton() {
+    return Transform(
+      alignment: Alignment.center,
+      transform: Matrix4.rotationY(pi),
+      child: IconButton(
+          onPressed: () async {
+            final File? res = await CustomImagePicker.pickMedia(
+                isGallery: false, fixRatio: false);
+            if (res == null) {
+              return;
+            }
+            final imageBytes = await File(res.path).readAsBytes();
+            final imageFile = await decodeImageFromList(imageBytes);
+
+            final ratioDimension = dimensionToAllowedPercentage(
+                Size(imageFile.width.toDouble(), imageFile.height.toDouble()));
+
+            final newItem = PageItem(
+                pageId: widget.id,
+                type: PageItemType.IMAGE,
+                data: imageBytes,
+                coordinates: const Point<double>(0.1, 0.1),
+                width: ratioDimension.width,
+                height: ratioDimension.height,
+                zIndex: items.length);
+            items.add(newItem);
+            setState(() {
+              items = items;
+            });
+          },
+          icon: const Icon(Icons.add_a_photo)),
+    );
+  }
+
+  Widget addTextBoxButton() {
+    return IconButton(
+        onPressed: () async {
+          final result = await showTextInputDialog(
+            context,
+            title: 'Add Text',
+            hintText: 'Type some text',
+            okText: 'OK',
+            cancelText: 'Cancel',
+            validator: (text) {
+              return null;
+            },
+          );
+          if (result == null) {
+            return;
+          }
+
+          final newItem = PageItem(
+              pageId: widget.id,
+              type: PageItemType.TEXTBOX,
+              data: Uint8List.fromList(
+                  utf8.encode(result.isNotEmpty ? result : 'Type some text')),
+              coordinates: const Point(0.1, 0.1),
+              width: 0.5,
+              height: 0.2,
+              zIndex: items.length);
+          items.add(newItem);
+          setState(() {
+            items = items;
+          });
+        },
+        icon: const Icon(Icons.post_add_rounded));
+  }
+
   Widget toBackButton() {
     return IconButton(
         onPressed: (items.length == 1 || items.indexOf(_selectedItem!) == 0)
@@ -110,107 +236,40 @@ class _PageEditPageState extends State<PageEditPage> {
         icon: const Icon(Icons.delete_forever));
   }
 
-  Widget basicToolBar() {
-    return Wrap(
-      children: [
-        IconButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    content: SingleChildScrollView(
-                      child: HueRingPicker(
-                        pickerColor: page.color,
-                        onColorChanged: (Color newColor) {
-                          page.color = newColor;
-                          setState(() {
-                            page = page;
-                          });
-                        },
-                        enableAlpha: false,
-                        displayThumbColor: true,
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-            icon: const Icon(Icons.format_color_fill)),
-        IconButton(
-            onPressed: () async {
-              final File? res = await CustomImagePicker.pickMedia(
-                  isGallery: true, fixRatio: false);
-              if (res == null) {
-                return;
-              }
-              final imageBytes = await File(res.path).readAsBytes();
-              final imageFile = await decodeImageFromList(imageBytes);
+  Widget editTextButton() {
+    return IconButton(
+        onPressed: _selectedItem != null
+            ? () async {
+                final result = await showTextInputDialog(
+                  context,
+                  title: 'Edit Text',
+                  hintText: 'Type some text',
+                  okText: 'OK',
+                  cancelText: 'Cancel',
+                  initValue: utf8.decode(_selectedItem!.data),
+                  validator: (text) {
+                    return null;
+                  },
+                );
 
-              final ratioDimension = dimensionToAllowedPercentage(Size(
-                  imageFile.width.toDouble(), imageFile.height.toDouble()));
+                if (result == null) return;
 
-              final newItem = PageItem(
-                  pageId: widget.id,
-                  type: PageItemType.IMAGE,
-                  data: imageBytes,
-                  coordinates: const Point(0.1, 0.1),
-                  width: ratioDimension.width,
-                  height: ratioDimension.height,
-                  zIndex: items.length);
-              items.add(newItem);
-              setState(() {
-                items = items;
-              });
-            },
-            icon: const Icon(Icons.add_photo_alternate)),
-        Transform(
-          alignment: Alignment.center,
-          transform: Matrix4.rotationY(pi),
-          child: IconButton(
-              onPressed: () async {
-                final File? res = await CustomImagePicker.pickMedia(
-                    isGallery: false, fixRatio: false);
-                if (res == null) {
-                  return;
-                }
-                final imageBytes = await File(res.path).readAsBytes();
-                final imageFile = await decodeImageFromList(imageBytes);
-
-                final ratioDimension = dimensionToAllowedPercentage(Size(
-                    imageFile.width.toDouble(), imageFile.height.toDouble()));
-
-                final newItem = PageItem(
-                    pageId: widget.id,
-                    type: PageItemType.IMAGE,
-                    data: imageBytes,
-                    coordinates: const Point<double>(0.1, 0.1),
-                    width: ratioDimension.width,
-                    height: ratioDimension.height,
-                    zIndex: items.length);
-                items.add(newItem);
+                _selectedItem!.data = Uint8List.fromList(utf8.encode(result));
                 setState(() {
                   items = items;
                 });
-              },
-              icon: const Icon(Icons.add_a_photo)),
-        ),
-        IconButton(
-            onPressed: () {
-              final newItem = PageItem(
-                  pageId: widget.id,
-                  type: PageItemType.TEXTBOX,
-                  data: Uint8List.fromList(utf8.encode('Type some text')),
-                  coordinates: const Point(0.1, 0.1),
-                  width: 0.5,
-                  height: 0.2,
-                  zIndex: items.length);
-              items.add(newItem);
-              setState(() {
-                items = items;
-              });
-            },
-            icon: const Icon(Icons.post_add_rounded)),
+              }
+            : null,
+        icon: const Icon(Icons.edit));
+  }
+
+  Widget basicToolBar() {
+    return Wrap(
+      children: [
+        pageFillColorButton(),
+        chooseImageButton(),
+        takePhotoButton(),
+        addTextBoxButton(),
       ],
     );
   }
@@ -228,6 +287,7 @@ class _PageEditPageState extends State<PageEditPage> {
   Widget textToolBar() {
     return Wrap(
       children: [
+        editTextButton(),
         toBackButton(),
         toFrontButton(),
         deleteButton(),
@@ -307,49 +367,6 @@ class _PageEditPageState extends State<PageEditPage> {
         ],
       ),
       child: basicToolBar(),
-    );
-  }
-
-  Widget inputBar() {
-    if (_selectedItem == null) {
-      return const SizedBox(
-        width: 1,
-        height: 1,
-      );
-    }
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 3,
-            blurRadius: 7,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-        child: TextFormField(
-          initialValue: utf8.decode(_selectedItem!.data),
-          decoration: InputDecoration(
-            hintText: 'Type here',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-            isDense: true,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-          ),
-          autofocus: true,
-          maxLines: 1,
-          onChanged: (text) {
-            _selectedItem!.data = Uint8List.fromList(utf8.encode(text));
-            setState(() {
-              items = items;
-            });
-          },
-        ),
-      ),
     );
   }
 
@@ -505,9 +522,6 @@ class _PageEditPageState extends State<PageEditPage> {
                 top: 0,
                 child: ToolBar(context),
               ),
-              if (_selectedItem != null &&
-                  _selectedItem!.type == PageItemType.TEXTBOX)
-                inputBar(),
             ],
           ),
         ));

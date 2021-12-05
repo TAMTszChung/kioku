@@ -57,16 +57,20 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: <Widget>[
             IconButton(
               onPressed: () async {
-                final result = await showTextInputDialog(context,
-                    title: 'Book Title',
-                    hintText: 'Title',
-                    okText: 'OK',
-                    cancelText: 'Cancel', validator: (text) {
-                  if (text == null || text.isEmpty) {
-                    return 'Title cannot be empty';
-                  }
-                  return null;
-                });
+                final result = await showTextInputDialog(
+                  context,
+                  title: 'Book Title',
+                  hintText: 'Title',
+                  okText: 'OK',
+                  cancelText: 'Cancel',
+                  validator: (text) {
+                    if (text == null || text.isEmpty) {
+                      return 'Title cannot be empty';
+                    }
+                    return null;
+                  },
+                  maxLength: 35,
+                );
 
                 if (result != null) {
                   provider.insert(Book(title: result));

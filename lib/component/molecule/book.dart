@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:kioku/model/book.dart';
 
 class BookWidget extends StatelessWidget {
   final Book book;
   final String? routeName;
+  final double fontSize;
 
-  const BookWidget(this.book, {this.routeName, Key? key}) : super(key: key);
+  const BookWidget(this.book, {this.routeName, this.fontSize = 14.0, Key? key})
+      : super(key: key);
 
-  const BookWidget.withRoute(Book book, String routeName, {Key? key})
-      : this(book, routeName: routeName, key: key);
+  const BookWidget.withRoute(Book book, String routeName,
+      {double fontSize = 14.0, Key? key})
+      : this(book, routeName: routeName, fontSize: fontSize, key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -53,10 +57,16 @@ class BookWidget extends StatelessWidget {
                       color: Colors.white70,
                     ),
                     constraints:
-                        const BoxConstraints(minHeight: 10, maxHeight: 30),
+                        BoxConstraints(minHeight: 10, maxHeight: fontSize * 3),
                     width: double.infinity,
                     child: Center(
-                      child: Text(book.title),
+                      child: Text(
+                        book.title,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.lato(
+                          fontSize: fontSize,
+                        ),
+                      ),
                     ))),
           ),
         ),
