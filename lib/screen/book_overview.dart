@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -22,27 +23,14 @@ Future<Uint8List> savePDF(pw.Document pdf) async {
   return await pdf.save();
 }
 
-class BookOverview extends StatefulWidget {
-  final int id;
-  const BookOverview(this.id, {Key? key}) : super(key: key);
-
-  final String title = 'Book Overview';
-
-  @override
-  State<BookOverview> createState() => _BookOverviewState();
-}
-
-class _BookOverviewState extends State<BookOverview> {
-  String _viewMode = 'Book';
-  bool addingPage = false;
-  String _selectedCategory = 'All';
-  bool exporting = false;
-  bool saving = false;
-
-  late Book book;
-  List<BookPage> pages = [];
-
-  Future<File> getBookPdf() async {
+void generateBookPdf(SendPort port) {
+  final rPort = ReceivePort();
+  port.send(rPort.sendPort);
+  rPort.listen((message) {
+    final send = message[0] as SendPort;
+    final book = message[1] as Book;
+    final pages = message[2] as List<BookPage>;
+    final tempDir = message[3] as Directory;
     final pdf = pw.Document();
 
     pdf.addPage(pw.Page(
@@ -146,11 +134,43 @@ class _BookOverviewState extends State<BookOverview> {
           }));
     }
 
-    Directory tempDir = await getTemporaryDirectory();
-    String tempPath = tempDir.path;
-    final file = File('$tempPath/${book.title}.pdf');
-    await file.writeAsBytes(await pdf.save());
-    return file;
+    pdf.save().then((bytes) {
+      final file = File('${tempDir.path}/${book.title}.pdf');
+      return file.writeAsBytes(bytes);
+    }).then((file) {
+      send.send(file);
+    });
+  });
+}
+
+class BookOverview extends StatefulWidget {
+  final int id;
+  const BookOverview(this.id, {Key? key}) : super(key: key);
+
+  final String title = 'Book Overview';
+
+  @override
+  State<BookOverview> createState() => _BookOverviewState();
+}
+
+class _BookOverviewState extends State<BookOverview> {
+  String _viewMode = 'Book';
+  bool addingPage = false;
+  String _selectedCategory = 'All';
+  bool exporting = false;
+  bool saving = false;
+
+  late Book book;
+  List<BookPage> pages = [];
+
+  Future<File> getBookPdf() async {
+    final response = ReceivePort();
+    final tempDir = await getTemporaryDirectory();
+    await Isolate.spawn(generateBookPdf, response.sendPort);
+    final sendPort = await response.first;
+    final answer = ReceivePort();
+    sendPort.send([answer.sendPort, book, pages, tempDir]);
+    return await answer.first;
   }
 
   Widget showSubView() {
