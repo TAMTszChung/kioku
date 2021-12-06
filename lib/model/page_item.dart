@@ -12,6 +12,7 @@ class PageItemModel extends BaseModel {
   static const pageId = 'page_id';
   static const name = 'name';
   static const type = 'type';
+  static const description = 'description';
   static const data = 'data';
   static const attributes = 'attributes';
   static const categories = 'categories';
@@ -32,6 +33,7 @@ class PageItemModel extends BaseModel {
           DBCol(name: pageId, type: DBType.fromForeign(pageTableIdCol.type)),
           DBCol(name: name, type: DBType.text()),
           DBCol(name: type, type: DBType.text(notNull: true)),
+          DBCol(name: description, type: DBType.text()),
           DBCol(name: data, type: DBType.blob(notNull: true)),
           DBCol(name: attributes, type: DBType.text(notNull: true)),
           DBCol(name: categories, type: DBType.text(notNull: true)),
@@ -66,6 +68,7 @@ class PageItem {
   int pageId; // id of page owning this item
   String? name; // name
   PageItemType type; // type
+  String? description; // description
   Uint8List data; // data in bytes
   Map<String, String> attributes; // attributes of data
   List<String> categories; // categories
@@ -105,6 +108,7 @@ class PageItem {
       required this.pageId,
       this.name,
       required this.type,
+      this.description,
       required this.data,
       required this.attributes,
       this.categories = const [],
@@ -121,6 +125,7 @@ class PageItem {
       {required int pageId,
       String? name,
       required PageItemType type,
+      String? description,
       required Uint8List data,
       Point<double> coordinates = const Point<double>(0.0, 0.0),
       required double width,
@@ -142,6 +147,7 @@ class PageItem {
         pageId: pageId,
         name: name,
         type: type,
+        description: description,
         data: data,
         attributes: attributes,
         coordinates: coordinates,
@@ -173,6 +179,7 @@ class PageItem {
         pageId: json[PageItemModel.pageId] as int,
         name: json[PageItemModel.name] as String?,
         type: PageItemType(json[PageItemModel.type] as String),
+        description: json[PageItemModel.description] as String?,
         data: json[PageItemModel.data] as Uint8List,
         attributes: attributes,
         categories: categories,
@@ -194,6 +201,7 @@ class PageItem {
     int? pageId,
     String? name,
     PageItemType? type,
+    String? description,
     Uint8List? data,
     Map<String, String>? attributes,
     List<String>? categories,
@@ -212,6 +220,7 @@ class PageItem {
         pageId: pageId ?? original.pageId,
         name: name ?? original.name,
         type: type ?? original.type,
+        description: description ?? original.description,
         data: data ?? original.data,
         attributes: attributes ?? Map.from(original.attributes),
         categories: categories ?? List.from(original.categories),
@@ -229,6 +238,7 @@ class PageItem {
     int? pageId,
     String? name,
     PageItemType? type,
+    String? description,
     Uint8List? data,
     Map<String, String>? attributes,
     List<String>? categories,
@@ -244,6 +254,7 @@ class PageItem {
         pageId: pageId,
         name: name,
         type: type,
+        description: description,
         data: data,
         attributes: attributes,
         categories: categories,
@@ -262,6 +273,7 @@ class PageItem {
         PageItemModel.pageId: pageId,
         PageItemModel.name: name,
         PageItemModel.type: type.value,
+        PageItemModel.description: description,
         PageItemModel.data: data,
         PageItemModel.attributes: jsonEncode(attributes),
         PageItemModel.categories: categories.join(','),
