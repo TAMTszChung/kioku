@@ -83,7 +83,7 @@ class _BookPageViewState extends State<BookPageView> {
             builder: (context, candidateItems, rejectedItems) {
               return Container(
                 decoration: BoxDecoration(
-                  color: candidateItems.isNotEmpty ? Colors.blue : null,
+                  color: candidateItems.isNotEmpty ? Colors.red[700] : null,
                 ),
                 constraints: BoxConstraints(
                     minHeight: 50,

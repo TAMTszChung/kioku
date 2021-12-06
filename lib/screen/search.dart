@@ -75,7 +75,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   _searchedCategory = 'All';
                 });
               },
-              child: Text('Clear Search'))
+              child: const Text('Clear Search'))
         ],
       ),
       body: Center(
@@ -86,14 +86,14 @@ class _SearchScreenState extends State<SearchScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text('Seach By:   '),
+                  const Text('Seach By:   '),
                   ToggleSwitch(
                     initialLabelIndex: _searchMode,
                     minWidth: 80.0,
                     fontSize: 12,
                     cornerRadius: 15.0,
                     totalSwitches: 2,
-                    labels: ['Name', 'Category'],
+                    labels: const ['Name', 'Category'],
                     onToggle: (index) {
                       setState(() {
                         _searchMode = index;
@@ -104,7 +104,7 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
               if (_searchMode == 0)
                 Padding(
-                  padding: EdgeInsets.only(top: 10),
+                  padding: const EdgeInsets.only(top: 10),
                   child: TextFormField(
                     initialValue: _searchedName,
                     decoration: InputDecoration(
@@ -120,7 +120,6 @@ class _SearchScreenState extends State<SearchScreen> {
                       setState(() {
                         _searchedName = text;
                       });
-                      print(text);
                     },
                   ),
                 ),

@@ -12,7 +12,6 @@ import 'package:kioku/screen/item_detail.dart';
 import 'package:kioku/screen/page_edit.dart';
 import 'package:kioku/screen/page_reorder.dart';
 import 'package:kioku/screen/search.dart';
-import 'package:kioku/screen/share.dart';
 import 'package:provider/provider.dart';
 
 void main() => runApp(const MyApp());
@@ -104,7 +103,6 @@ class _AppScreenState extends State<AppScreen> {
   static const List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
     SearchScreen(),
-    ShareScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -128,10 +126,6 @@ class _AppScreenState extends State<AppScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
             label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.share),
-            label: 'Share',
           ),
         ],
         currentIndex: _selectedIndex,

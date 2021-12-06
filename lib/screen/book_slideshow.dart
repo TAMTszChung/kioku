@@ -57,7 +57,7 @@ class _BookSlideShowState extends State<BookSlideshowPage> {
               ? 'Page ${page!.pageNumber}/${pages.length}'
               : 'Cover'),
           actions: <Widget>[
-            TextButton(
+            IconButton(
                 onPressed: () {
                   if (page != null) {
                     Navigator.pushNamed(context, pageEditRoute,
@@ -67,7 +67,7 @@ class _BookSlideShowState extends State<BookSlideshowPage> {
                         arguments: widget.bookId);
                   }
                 },
-                child: const Text("Edit"))
+                icon: const Icon(Icons.edit))
           ],
         ),
         body: CarouselSlider.builder(

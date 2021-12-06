@@ -23,16 +23,16 @@ class CustomImagePicker {
     final compressRatio =
         fileSize > maxSize ? ((maxSize / fileSize) * 100).floor() : 100;
 
-    File? croppecdFile;
+    File? croppedFile;
     if (fixRatio) {
-      croppecdFile = await ImageCropper.cropImage(
+      croppedFile = await ImageCropper.cropImage(
         sourcePath: file.path,
         aspectRatio: const CropAspectRatio(ratioX: 210, ratioY: 297),
         aspectRatioPresets: const [],
         compressQuality: compressRatio,
       );
     } else {
-      croppecdFile = await ImageCropper.cropImage(
+      croppedFile = await ImageCropper.cropImage(
           sourcePath: file.path,
           compressQuality: compressRatio,
           androidUiSettings: const AndroidUiSettings(
@@ -40,6 +40,6 @@ class CustomImagePicker {
               lockAspectRatio: false));
     }
 
-    return croppecdFile;
+    return croppedFile;
   }
 }

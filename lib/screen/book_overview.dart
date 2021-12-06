@@ -1,12 +1,26 @@
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:kioku/component/organism/book_cardview.dart';
 import 'package:kioku/component/organism/book_listview.dart';
 import 'package:kioku/component/organism/book_pageview.dart';
+import 'package:kioku/model/book.dart';
 import 'package:kioku/model/book_page.dart';
 import 'package:kioku/model/page_item.dart';
 import 'package:kioku/provider/book.dart';
 import 'package:kioku/provider/book_page.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+
+Future<Uint8List> savePDF(pw.Document pdf) async {
+  return await pdf.save();
+}
 
 class BookOverview extends StatefulWidget {
   final int id;
@@ -22,6 +36,122 @@ class _BookOverviewState extends State<BookOverview> {
   String _viewMode = 'Book';
   bool addingPage = false;
   String _selectedCategory = 'All';
+  bool exporting = false;
+  bool saving = false;
+
+  late Book book;
+  List<BookPage> pages = [];
+
+  Future<File> getBookPdf() async {
+    final pdf = pw.Document();
+
+    pdf.addPage(pw.Page(
+        pageTheme: pw.PageTheme(
+          pageFormat: const PdfPageFormat(
+            21.0 * PdfPageFormat.cm,
+            29.7 * PdfPageFormat.cm,
+          ),
+          buildBackground: (pw.Context context) => pw.Container(
+              decoration: pw.BoxDecoration(
+            borderRadius: pw.BorderRadius.circular(15),
+          )),
+        ),
+        build: (pw.Context context) {
+          return pw.Center(
+            child: pw.AspectRatio(
+                aspectRatio: 210 / 297,
+                child: pw.Container(
+                  decoration: pw.BoxDecoration(
+                    color: book.cover == null
+                        ? PdfColor.fromHex(
+                            book.color.value.toRadixString(16).substring(2))
+                        : null,
+                    image: book.cover != null
+                        ? pw.DecorationImage(
+                            image: pw.MemoryImage(book.cover!),
+                            fit: pw.BoxFit.cover,
+                          )
+                        : null,
+                    borderRadius: pw.BorderRadius.circular(15),
+                    boxShadow: [
+                      pw.BoxShadow(
+                        color: PdfColor.fromHex('9e9e9e7f'),
+                        spreadRadius: 3,
+                        blurRadius: 7,
+                      ),
+                    ],
+                  ),
+                  padding: const pw.EdgeInsets.symmetric(vertical: 15),
+                  child: pw.Align(
+                      alignment: const pw.Alignment(0, -0.5),
+                      child: pw.Container(
+                          decoration: pw.BoxDecoration(
+                            color: PdfColor.fromHex('ffffffb3'),
+                          ),
+                          constraints: const pw.BoxConstraints(
+                              minHeight: 10, maxHeight: 14 * 3.5),
+                          width: double.infinity,
+                          child: pw.Center(
+                            child: pw.Text(
+                              book.title,
+                              textAlign: pw.TextAlign.center,
+                              style: pw.TextStyle(
+                                fontSize: 14,
+                                color: PdfColor.fromHex('000000'),
+                                fontWeight: pw.FontWeight.normal,
+                                decoration: pw.TextDecoration.none,
+                              ),
+                            ),
+                          ))),
+                )),
+          );
+        }));
+
+    for (var page in pages) {
+      pdf.addPage(pw.Page(
+          pageTheme: pw.PageTheme(
+            pageFormat: const PdfPageFormat(
+              21.0 * PdfPageFormat.cm,
+              29.7 * PdfPageFormat.cm,
+            ),
+            buildBackground: (pw.Context context) => pw.Container(
+                decoration: pw.BoxDecoration(
+              borderRadius: pw.BorderRadius.circular(15),
+            )),
+          ),
+          build: (pw.Context context) {
+            return pw.Center(
+                child: pw.AspectRatio(
+                    aspectRatio: 210 / 297,
+                    child: pw.Container(
+                      decoration: pw.BoxDecoration(
+                        color: PdfColor.fromHex(
+                            page.color.value.toRadixString(16).substring(2)),
+                        image: page.thumbnail != null
+                            ? pw.DecorationImage(
+                                image: pw.MemoryImage(page.thumbnail!),
+                                fit: pw.BoxFit.cover,
+                              )
+                            : null,
+                        borderRadius: pw.BorderRadius.circular(15),
+                        boxShadow: [
+                          pw.BoxShadow(
+                            color: PdfColor.fromHex('9e9e9e7f'),
+                            spreadRadius: 3,
+                            blurRadius: 7,
+                          ),
+                        ],
+                      ),
+                    )));
+          }));
+    }
+
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = tempDir.path;
+    final file = File('$tempPath/${book.title}.pdf');
+    await file.writeAsBytes(await pdf.save());
+    return file;
+  }
 
   Widget showSubView() {
     switch (_viewMode) {
@@ -38,24 +168,29 @@ class _BookOverviewState extends State<BookOverview> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<BookProvider>();
-    final book = provider.get(widget.id);
+    final providerBook = provider.get(widget.id).copy();
     final pageProvider = context.watch<BookPageProvider>();
-    final pages =
+    final providerPages =
         pageProvider.getAllByBookId(widget.id).map((p) => p.copy()).toList();
+
+    setState(() {
+      book = providerBook;
+      pages = providerPages;
+    });
 
     return Scaffold(
       appBar: AppBar(
         title: Text(book.title),
         actions: <Widget>[
           if (_viewMode == 'Book')
-            TextButton(
+            IconButton(
                 onPressed: pages.length > 1
                     ? () {
                         Navigator.pushNamed(context, '/page_reorder',
                             arguments: widget.id);
                       }
                     : null,
-                child: const Text('Reorder Pages')),
+                icon: const Icon(Icons.swap_calls)),
           if (_viewMode == 'Book')
             IconButton(
                 onPressed: addingPage
@@ -142,6 +277,52 @@ class _BookOverviewState extends State<BookOverview> {
               ),
             ],
           ),
+          !exporting
+              ? IconButton(
+                  onPressed: exporting || saving
+                      ? null
+                      : () async {
+                          setState(() {
+                            exporting = true;
+                          });
+                          final file = await getBookPdf();
+                          await Share.shareFiles([file.path],
+                              text: 'Exported Memory Book');
+                          file.delete();
+                          setState(() {
+                            exporting = false;
+                          });
+                        },
+                  icon: const Icon(Icons.share))
+              : const Center(
+                  child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator())),
+          !saving
+              ? IconButton(
+                  onPressed: exporting || saving
+                      ? null
+                      : () async {
+                          setState(() {
+                            saving = true;
+                          });
+                          final file = await getBookPdf();
+                          final params =
+                              SaveFileDialogParams(sourceFilePath: file.path);
+                          final filePath =
+                              await FlutterFileDialog.saveFile(params: params);
+                          file.delete();
+                          setState(() {
+                            saving = false;
+                          });
+                        },
+                  icon: const Icon(Icons.save_alt))
+              : const Center(
+                  child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator())),
         ],
       ),
       body: showSubView(),

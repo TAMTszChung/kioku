@@ -697,7 +697,7 @@ class _PageEditPageState extends State<PageEditPage> {
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator()))
-                  : TextButton(
+                  : IconButton(
                       onPressed: () async {
                         setState(() {
                           _selectedItem = null;
@@ -736,7 +736,7 @@ class _PageEditPageState extends State<PageEditPage> {
                           Navigator.pop(context);
                         });
                       },
-                      child: const Text('Save'))
+                      icon: const Icon(Icons.save))
             ],
           ),
           //-------------------- Interactive Viewer -------------------

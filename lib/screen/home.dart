@@ -170,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               return Container(
                                 decoration: BoxDecoration(
                                   color: candidateItems.isNotEmpty
-                                      ? Colors.blue
+                                      ? Colors.red[700]
                                       : null,
                                 ),
                                 constraints: BoxConstraints(
@@ -178,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     maxHeight: 80,
                                     minWidth: deviceData.size.width,
                                     maxWidth: deviceData.size.width),
-                                child: Icon(Icons.delete),
+                                child: const Icon(Icons.delete),
                               );
                             },
                             onAccept: (book) async {
