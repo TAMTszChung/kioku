@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:kioku/model/page_item.dart';
+import 'package:kioku/provider/book.dart';
+import 'package:kioku/provider/book_page.dart';
 import 'package:kioku/provider/page_item.dart';
 import 'package:provider/provider.dart';
 
@@ -47,10 +49,21 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       (a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
                 }
 
+                //update item details
                 await context.read<PageItemProvider>().update(widget.item.copy(
                     name: newName,
                     categories: newCategories,
                     datetime: newDateTime));
+
+                //set page last update time
+                final pageProvider = context.read<BookPageProvider>();
+                final page = pageProvider.get(widget.item.pageId);
+                await pageProvider.update(page);
+
+                //set book last update time
+                final bookProvider = context.read<BookProvider>();
+                final book = bookProvider.get(page.bookId);
+                bookProvider.update(book);
 
                 Navigator.pop(context);
               },

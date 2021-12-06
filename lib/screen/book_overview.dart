@@ -53,6 +53,7 @@ class _BookOverviewState extends State<BookOverview> {
                           addingPage = true;
                         });
                         await pageProvider.insert(BookPage(bookId: widget.id));
+                        await provider.update(book);
                         setState(() {
                           addingPage = false;
                         });

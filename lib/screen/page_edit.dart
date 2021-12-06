@@ -13,8 +13,10 @@ import 'package:kioku/component/atom/input_dialog.dart';
 import 'package:kioku/component/atom/resizable.dart';
 import 'package:kioku/component/molecule/custom_image_picker.dart';
 import 'package:kioku/component/molecule/page_item.dart';
+import 'package:kioku/model/book.dart';
 import 'package:kioku/model/book_page.dart';
 import 'package:kioku/model/page_item.dart';
+import 'package:kioku/provider/book.dart';
 import 'package:kioku/provider/book_page.dart';
 import 'package:kioku/provider/page_item.dart';
 import 'package:provider/provider.dart';
@@ -711,9 +713,10 @@ class _PageEditPageState extends State<PageEditPage> {
 
                         await context
                             .read<PageItemProvider>()
-                            .setAll(copiedItems);
+                            .setAll(widget.id, copiedItems);
 
                         await Future.delayed(Duration.zero, () async {
+                          //update page thumbnail
                           Uint8List? pageSnapshot;
                           await _capturePng()
                               .then((value) => pageSnapshot = value);
@@ -723,9 +726,15 @@ class _PageEditPageState extends State<PageEditPage> {
                           await context
                               .read<BookPageProvider>()
                               .update(newPage);
+
+                          //update book time
+                          final Book book =
+                              context.read<BookProvider>().get(page.bookId);
+                          await context.read<BookProvider>().update(book);
+
+                          //pop screen
                           Navigator.pop(context);
                         });
-                        //TODO: Update book last update time
                       },
                       child: const Text('Save'))
             ],

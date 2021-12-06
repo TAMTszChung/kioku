@@ -84,6 +84,8 @@ class PageItemProvider extends DataProvider {
     final count = await db
         .delete(tableName, where: '${PageItemModel.id} = ?', whereArgs: [id]);
     if (count != 1) return null;
+    _items.removeWhere((item) => item.id == id);
+    notifyListeners();
     return id;
   }
 
@@ -108,9 +110,7 @@ class PageItemProvider extends DataProvider {
     });
   }
 
-  Future<List<PageItem>> setAll(List<PageItem> listToSet) async {
-    if (listToSet.isEmpty) return const [];
-    final pageId = listToSet.first.pageId;
+  Future<List<PageItem>> setAll(int pageId, List<PageItem> listToSet) async {
     if (listToSet.any((item) => item.pageId != pageId)) {
       throw ArgumentError('All items must have identical pageId', 'listToSet');
     }

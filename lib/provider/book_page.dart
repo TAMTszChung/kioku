@@ -102,6 +102,8 @@ class BookPageProvider extends DataProvider {
     final count = await db
         .delete(tableName, where: '${BookPageModel.id} = ?', whereArgs: [id]);
     if (count != 1) return null;
+    _pages.removeWhere((page) => page.id == id);
+    notifyListeners();
     return id;
   }
 
@@ -128,9 +130,7 @@ class BookPageProvider extends DataProvider {
         .sortedBy<num>((page) => page.pageNumber);
   }
 
-  Future<List<BookPage>> setAll(List<BookPage> listToSet) async {
-    if (listToSet.isEmpty) return const [];
-    final bookId = listToSet.first.bookId;
+  Future<List<BookPage>> setAll(int bookId, List<BookPage> listToSet) async {
     if (listToSet.any((item) => item.bookId != bookId)) {
       throw ArgumentError('All pages must have identical bookId', 'listToSet');
     }

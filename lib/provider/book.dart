@@ -71,6 +71,8 @@ class BookProvider extends DataProvider {
     final count = await db
         .delete(tableName, where: '${BookModel.id} = ?', whereArgs: [id]);
     if (count != 1) return null;
+    _books.removeWhere((book) => book.id == id);
+    notifyListeners();
     return id;
   }
 

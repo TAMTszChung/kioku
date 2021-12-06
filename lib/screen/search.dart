@@ -60,6 +60,7 @@ class _SearchScreenState extends State<SearchScreen> {
         .items
         .map((item) => item.copy())
         .toList();
+    items.removeWhere((item) => item.type == PageItemType.TEXTBOX);
     setState(() {
       items = items;
     });
