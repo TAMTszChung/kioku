@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:kioku/component/organism/book_cardview.dart';
 import 'package:kioku/component/organism/book_listview.dart';
@@ -33,69 +34,9 @@ void generateBookPdf(SendPort port) {
     final tempDir = message[3] as Directory;
     final pdf = pw.Document();
 
-    pdf.addPage(pw.Page(
-        pageTheme: pw.PageTheme(
-          pageFormat: const PdfPageFormat(
-            21.0 * PdfPageFormat.cm,
-            29.7 * PdfPageFormat.cm,
-          ),
-          buildBackground: (pw.Context context) => pw.Container(
-              decoration: pw.BoxDecoration(
-            borderRadius: pw.BorderRadius.circular(15),
-          )),
-        ),
-        build: (pw.Context context) {
-          return pw.Center(
-            child: pw.AspectRatio(
-                aspectRatio: 210 / 297,
-                child: pw.Container(
-                  decoration: pw.BoxDecoration(
-                    color: book.cover == null
-                        ? PdfColor.fromHex(
-                            book.color.value.toRadixString(16).substring(2))
-                        : null,
-                    image: book.cover != null
-                        ? pw.DecorationImage(
-                            image: pw.MemoryImage(book.cover!),
-                            fit: pw.BoxFit.cover,
-                          )
-                        : null,
-                    borderRadius: pw.BorderRadius.circular(15),
-                    boxShadow: [
-                      pw.BoxShadow(
-                        color: PdfColor.fromHex('9e9e9e7f'),
-                        spreadRadius: 3,
-                        blurRadius: 7,
-                      ),
-                    ],
-                  ),
-                  padding: const pw.EdgeInsets.symmetric(vertical: 15),
-                  child: pw.Align(
-                      alignment: const pw.Alignment(0, -0.5),
-                      child: pw.Container(
-                          decoration: pw.BoxDecoration(
-                            color: PdfColor.fromHex('ffffffb3'),
-                          ),
-                          constraints: const pw.BoxConstraints(
-                              minHeight: 10, maxHeight: 14 * 3.5),
-                          width: double.infinity,
-                          child: pw.Center(
-                            child: pw.Text(
-                              book.title,
-                              textAlign: pw.TextAlign.center,
-                              style: pw.TextStyle(
-                                fontSize: 14,
-                                color: PdfColor.fromHex('000000'),
-                                fontWeight: pw.FontWeight.normal,
-                                decoration: pw.TextDecoration.none,
-                              ),
-                            ),
-                          ))),
-                )),
-          );
-        }));
-
-    for (var page in pages) {
+    rootBundle.load('fonts/lato.ttf').then((fontData) {
+      return pw.Font.ttf(fontData);
+    }).then((font) {
       pdf.addPage(pw.Page(
           pageTheme: pw.PageTheme(
             pageFormat: const PdfPageFormat(
@@ -109,36 +50,101 @@ void generateBookPdf(SendPort port) {
           ),
           build: (pw.Context context) {
             return pw.Center(
-                child: pw.AspectRatio(
-                    aspectRatio: 210 / 297,
-                    child: pw.Container(
-                      decoration: pw.BoxDecoration(
-                        color: PdfColor.fromHex(
-                            page.color.value.toRadixString(16).substring(2)),
-                        image: page.thumbnail != null
-                            ? pw.DecorationImage(
-                                image: pw.MemoryImage(page.thumbnail!),
-                                fit: pw.BoxFit.cover,
-                              )
-                            : null,
-                        borderRadius: pw.BorderRadius.circular(15),
-                        boxShadow: [
-                          pw.BoxShadow(
-                            color: PdfColor.fromHex('9e9e9e7f'),
-                            spreadRadius: 3,
-                            blurRadius: 7,
-                          ),
-                        ],
-                      ),
-                    )));
+              child: pw.AspectRatio(
+                  aspectRatio: 210 / 297,
+                  child: pw.Container(
+                    decoration: pw.BoxDecoration(
+                      color: book.cover == null
+                          ? PdfColor.fromHex(
+                              book.color.value.toRadixString(16).substring(2))
+                          : null,
+                      image: book.cover != null
+                          ? pw.DecorationImage(
+                              image: pw.MemoryImage(book.cover!),
+                              fit: pw.BoxFit.cover,
+                            )
+                          : null,
+                      borderRadius: pw.BorderRadius.circular(15),
+                      boxShadow: [
+                        pw.BoxShadow(
+                          color: PdfColor.fromHex('9e9e9e7f'),
+                          spreadRadius: 3,
+                          blurRadius: 7,
+                        ),
+                      ],
+                    ),
+                    padding: const pw.EdgeInsets.symmetric(vertical: 15),
+                    child: pw.Align(
+                        alignment: const pw.Alignment(0, -0.5),
+                        child: pw.Container(
+                            decoration: pw.BoxDecoration(
+                              color: PdfColor.fromHex('ffffffb3'),
+                            ),
+                            constraints: const pw.BoxConstraints(
+                                minHeight: 10, maxHeight: 14 * 3.5),
+                            width: double.infinity,
+                            child: pw.Center(
+                              child: pw.Text(
+                                book.title,
+                                textAlign: pw.TextAlign.center,
+                                style: pw.TextStyle(
+                                  fontSize: 14,
+                                  font: font,
+                                  color: PdfColor.fromHex('000000'),
+                                  fontWeight: pw.FontWeight.normal,
+                                  decoration: pw.TextDecoration.none,
+                                ),
+                              ),
+                            ))),
+                  )),
+            );
           }));
-    }
 
-    pdf.save().then((bytes) {
-      final file = File('${tempDir.path}/${book.title}.pdf');
-      return file.writeAsBytes(bytes);
-    }).then((file) {
-      send.send(file);
+      for (var page in pages) {
+        pdf.addPage(pw.Page(
+            pageTheme: pw.PageTheme(
+              pageFormat: const PdfPageFormat(
+                21.0 * PdfPageFormat.cm,
+                29.7 * PdfPageFormat.cm,
+              ),
+              buildBackground: (pw.Context context) => pw.Container(
+                  decoration: pw.BoxDecoration(
+                borderRadius: pw.BorderRadius.circular(15),
+              )),
+            ),
+            build: (pw.Context context) {
+              return pw.Center(
+                  child: pw.AspectRatio(
+                      aspectRatio: 210 / 297,
+                      child: pw.Container(
+                        decoration: pw.BoxDecoration(
+                          color: PdfColor.fromHex(
+                              page.color.value.toRadixString(16).substring(2)),
+                          image: page.thumbnail != null
+                              ? pw.DecorationImage(
+                                  image: pw.MemoryImage(page.thumbnail!),
+                                  fit: pw.BoxFit.cover,
+                                )
+                              : null,
+                          borderRadius: pw.BorderRadius.circular(15),
+                          boxShadow: [
+                            pw.BoxShadow(
+                              color: PdfColor.fromHex('9e9e9e7f'),
+                              spreadRadius: 3,
+                              blurRadius: 7,
+                            ),
+                          ],
+                        ),
+                      )));
+            }));
+      }
+
+      pdf.save().then((bytes) {
+        final file = File('${tempDir.path}/${book.title}.pdf');
+        return file.writeAsBytes(bytes);
+      }).then((file) {
+        send.send(file);
+      });
     });
   });
 }
@@ -297,52 +303,84 @@ class _BookOverviewState extends State<BookOverview> {
               ),
             ],
           ),
-          !exporting
-              ? IconButton(
-                  onPressed: exporting || saving
-                      ? null
-                      : () async {
-                          setState(() {
-                            exporting = true;
-                          });
-                          final file = await getBookPdf();
-                          await Share.shareFiles([file.path],
-                              text: 'Exported Memory Book');
-                          file.delete();
-                          setState(() {
-                            exporting = false;
-                          });
+          IconButton(
+              onPressed: exporting || saving
+                  ? null
+                  : () async {
+                      setState(() {
+                        exporting = true;
+                      });
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext context) {
+                          return Dialog(
+                            child: Padding(
+                              padding: EdgeInsets.all(15),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: const [
+                                  Text("Exporting"),
+                                  CircularProgressIndicator(),
+                                ],
+                              ),
+                            ),
+                          );
                         },
-                  icon: const Icon(Icons.share))
-              : const Center(
-                  child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator())),
-          !saving
-              ? IconButton(
-                  onPressed: exporting || saving
-                      ? null
-                      : () async {
-                          setState(() {
-                            saving = true;
-                          });
-                          final file = await getBookPdf();
-                          final params =
-                              SaveFileDialogParams(sourceFilePath: file.path);
-                          final filePath =
-                              await FlutterFileDialog.saveFile(params: params);
-                          file.delete();
-                          setState(() {
-                            saving = false;
-                          });
+                      );
+
+                      final file = await getBookPdf();
+                      Navigator.pop(context);
+                      await Share.shareFiles([file.path],
+                          text: 'Exported Memory Book');
+                      file.delete();
+                      setState(() {
+                        exporting = false;
+                      });
+                    },
+              icon: const Icon(Icons.share)),
+          IconButton(
+              onPressed: exporting || saving
+                  ? null
+                  : () async {
+                      setState(() {
+                        saving = true;
+                      });
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext context) {
+                          return Dialog(
+                            child: Padding(
+                              padding: EdgeInsets.all(15),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: const [
+                                  Text("Exporting"),
+                                  CircularProgressIndicator(),
+                                ],
+                              ),
+                            ),
+                          );
                         },
-                  icon: const Icon(Icons.save_alt))
-              : const Center(
-                  child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator())),
+                      );
+
+                      final file = await getBookPdf();
+                      Navigator.pop(context);
+                      final params =
+                          SaveFileDialogParams(sourceFilePath: file.path);
+                      final filePath =
+                          await FlutterFileDialog.saveFile(params: params);
+                      file.delete();
+                      setState(() {
+                        saving = false;
+                      });
+                    },
+              icon: const Icon(Icons.save_alt)),
         ],
       ),
       body: showSubView(),

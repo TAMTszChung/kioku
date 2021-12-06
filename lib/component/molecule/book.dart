@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:kioku/model/book.dart';
 
 class BookWidget extends StatelessWidget {
@@ -62,7 +63,7 @@ class BookWidget extends StatelessWidget {
                       child: Text(
                         book.title,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: GoogleFonts.lato(
                           fontSize: fontSize,
                           color: Colors.black,
                           fontWeight: FontWeight.normal,
