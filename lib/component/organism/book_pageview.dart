@@ -90,7 +90,7 @@ class _BookPageViewState extends State<BookPageView> {
                     maxHeight: 80,
                     minWidth: deviceData.size.width,
                     maxWidth: deviceData.size.width),
-                child: Icon(Icons.delete),
+                child: const Icon(Icons.delete),
               );
             },
             onAccept: (page) async {
@@ -99,7 +99,6 @@ class _BookPageViewState extends State<BookPageView> {
               for (int i = 0; i < copiedPages.length; i++) {
                 copiedPages[i].pageNumber = i + 1;
               }
-              print(copiedPages);
 
               //delete this page
               await context

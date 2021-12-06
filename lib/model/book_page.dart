@@ -17,22 +17,23 @@ class BookPageModel extends BaseModel {
 
   BookPageModel({required String bookTableName, required DBCol bookTableIdCol})
       : super(
-            cols: DBCols([
-          DBCol(name: id, type: DBType.rowId()),
-          DBCol(name: bookId, type: DBType.fromForeign(bookTableIdCol.type)),
-          DBCol(name: pageNumber, type: DBType.int(notNull: true)),
-          DBCol(name: color, type: DBType.int(notNull: true)),
-          DBCol(name: thumbnail, type: DBType.blob()),
-          DBCol(name: createTime, type: DBType.int(notNull: true)),
-          DBCol(name: lastModifiedTime, type: DBType.int(notNull: true)),
-        ], foreignKeys: [
-          DBForeignKey(
-              colNames: [bookId],
-              foreignTableName: bookTableName,
-              foreignTableColNames: [bookTableIdCol.name]),
-        ], uniqueColNames: [
-          [bookId, pageNumber],
-        ]));
+            cols: DBCols(
+          [
+            DBCol(name: id, type: DBType.rowId()),
+            DBCol(name: bookId, type: DBType.fromForeign(bookTableIdCol.type)),
+            DBCol(name: pageNumber, type: DBType.int(notNull: true)),
+            DBCol(name: color, type: DBType.int(notNull: true)),
+            DBCol(name: thumbnail, type: DBType.blob()),
+            DBCol(name: createTime, type: DBType.int(notNull: true)),
+            DBCol(name: lastModifiedTime, type: DBType.int(notNull: true)),
+          ],
+          foreignKeys: [
+            DBForeignKey(
+                colNames: [bookId],
+                foreignTableName: bookTableName,
+                foreignTableColNames: [bookTableIdCol.name]),
+          ],
+        ));
 }
 
 class BookPage {

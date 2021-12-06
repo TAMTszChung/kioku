@@ -39,11 +39,23 @@ class _BookOverviewState extends State<BookOverview> {
   Widget build(BuildContext context) {
     final provider = context.watch<BookProvider>();
     final book = provider.get(widget.id);
-    final pageProvider = context.read<BookPageProvider>();
+    final pageProvider = context.watch<BookPageProvider>();
+    final pages =
+        pageProvider.getAllByBookId(widget.id).map((p) => p.copy()).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(book.title),
         actions: <Widget>[
+          if (_viewMode == 'Book')
+            TextButton(
+                onPressed: pages.length > 1
+                    ? () {
+                        Navigator.pushNamed(context, '/page_reorder',
+                            arguments: widget.id);
+                      }
+                    : null,
+                child: const Text('Reorder Pages')),
           if (_viewMode == 'Book')
             IconButton(
                 onPressed: addingPage

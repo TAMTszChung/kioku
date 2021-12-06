@@ -10,6 +10,7 @@ import 'package:kioku/screen/cover_edit.dart';
 import 'package:kioku/screen/home.dart';
 import 'package:kioku/screen/item_detail.dart';
 import 'package:kioku/screen/page_edit.dart';
+import 'package:kioku/screen/page_reorder.dart';
 import 'package:kioku/screen/search.dart';
 import 'package:kioku/screen/share.dart';
 import 'package:provider/provider.dart';
@@ -59,6 +60,11 @@ class MyApp extends StatelessWidget {
                 if (args is! int && args is! Iterable<int>) return null;
                 return MaterialPageRoute(builder: (context) {
                   return BookSlideshowPage(args);
+                });
+              case '/page_reorder':
+                if (args is! int) return null;
+                return MaterialPageRoute(builder: (context) {
+                  return PageReorderScreen(args);
                 });
               case '/cover_edit':
                 if (args is! int) return null;
