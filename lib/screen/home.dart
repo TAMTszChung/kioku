@@ -71,6 +71,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (text == null || text.isEmpty) {
                       return 'Title cannot be empty';
                     }
+                    if (RegExp('[^\x00-\x7F]+').hasMatch(text)) {
+                      return 'Title cannot contain unicode characters';
+                    }
+
                     return null;
                   },
                   maxLength: Book.titleLengthLimit,

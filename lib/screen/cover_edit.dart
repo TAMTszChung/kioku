@@ -66,6 +66,8 @@ class _CoverEditPageState extends State<CoverEditPage> {
               onChanged: (text) {
                 if (text.isEmpty) {
                   errorMsg = '*  Title cannot be empty';
+                } else if (RegExp('[^\x00-\x7F]+').hasMatch(text)) {
+                  errorMsg = 'Title cannot contain unicode characters';
                 } else {
                   errorMsg = '';
                 }
