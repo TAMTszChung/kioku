@@ -65,6 +65,9 @@ class BookWidget extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: GoogleFonts.lato(
                           fontSize: fontSize,
+                          color: Colors.black,
+                          fontWeight: FontWeight.normal,
+                          decoration: TextDecoration.none,
                         ),
                       ),
                     ))),
