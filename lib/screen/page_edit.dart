@@ -6,7 +6,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:kioku/component/atom/resizable.dart';
+import 'package:kioku/component/atom/transformable.dart';
 import 'package:kioku/component/molecule/custom_image_picker.dart';
 import 'package:kioku/component/molecule/page_item.dart';
 import 'package:kioku/model/book_page.dart';
@@ -33,7 +33,7 @@ class _PageEditPageState extends State<PageEditPage> {
   late BookPage page;
   late List<PageItem> items;
 
-  PageItem? _selectedItem = null;
+  PageItem? _selectedItem;
 
   @override
   void initState() {
@@ -290,7 +290,6 @@ class _PageEditPageState extends State<PageEditPage> {
   Widget build(BuildContext context) {
     return WillPopScope(
         onWillPop: () async {
-          // TODO: show confirm dialog telling user they will discard all the changes
           final res = await showDialog(
               context: context,
               builder: (BuildContext context) {
@@ -383,23 +382,23 @@ class _PageEditPageState extends State<PageEditPage> {
                                 });
 
                                 if (item == _selectedItem) {
-                                  return Resizable(
+                                  return Transformable(
                                     child: itemWidget,
-                                    initialTop: top,
-                                    initialLeft: left,
-                                    initialHeight: height,
-                                    initialWidth: width,
+                                    size: Size(width, height),
+                                    position: Offset(left, top),
+                                    rotation: item.rotation,
                                     isText: item.type == PageItemType.TEXTBOX,
-                                    onRelease: (Rect bound) {
+                                    onTransform: (size, position, rotation) {
                                       item.width =
-                                          bound.width / constraints.maxWidth;
+                                          size.width / constraints.maxWidth;
                                       item.height =
-                                          bound.height / constraints.maxHeight;
+                                          size.height / constraints.maxHeight;
                                       final newX =
-                                          bound.left / constraints.maxWidth;
+                                          position.dx / constraints.maxWidth;
                                       final newY =
-                                          bound.top / constraints.maxHeight;
+                                          position.dy / constraints.maxHeight;
                                       item.coordinates = Point(newX, newY);
+                                      item.rotation = rotation;
                                       setState(() {
                                         items = items;
                                       });
@@ -409,23 +408,26 @@ class _PageEditPageState extends State<PageEditPage> {
                                   return Positioned(
                                       top: top,
                                       left: left,
-                                      child: SizedBox(
-                                        height: height,
-                                        width: width,
-                                        child: GestureDetector(
-                                          behavior: HitTestBehavior.opaque,
-                                          onTapDown: (details) {
-                                            setState(() {
-                                              _selectedItem = item;
-                                            });
-                                          },
-                                          child: item.type == PageItemType.IMAGE
-                                              ? FittedBox(
-                                                  child: itemWidget,
-                                                  fit: BoxFit.fill)
-                                              : itemWidget,
-                                        ),
-                                      ));
+                                      child: Transform.rotate(
+                                          angle: item.rotation,
+                                          child: SizedBox(
+                                            height: height,
+                                            width: width,
+                                            child: GestureDetector(
+                                              behavior: HitTestBehavior.opaque,
+                                              onTapDown: (details) {
+                                                setState(() {
+                                                  _selectedItem = item;
+                                                });
+                                              },
+                                              child: item.type ==
+                                                      PageItemType.IMAGE
+                                                  ? FittedBox(
+                                                      child: itemWidget,
+                                                      fit: BoxFit.fill)
+                                                  : itemWidget,
+                                            ),
+                                          )));
                                 }
                               }).toList(),
                             ),
