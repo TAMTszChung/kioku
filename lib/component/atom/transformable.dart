@@ -84,7 +84,8 @@ class _TransformableState extends State<Transformable> {
           if (newHeight < _minSize) return;
 
           final updatedSize = Size(size.width, newHeight);
-          final updatedPosition = Offset(position.dx, position.dy + details.dy);
+          final updatedPosition = Offset(
+              position.dx, position.dy - (newHeight / 2 - size.height / 2));
 
           setState(() {
             size = updatedSize;
@@ -99,9 +100,12 @@ class _TransformableState extends State<Transformable> {
           if (newHeight < _minSize) return;
 
           final updatedSize = Size(size.width, newHeight);
+          final updatedPosition = Offset(
+              position.dx, position.dy - (newHeight / 2 - size.height / 2));
 
           setState(() {
             size = updatedSize;
+            position = updatedPosition;
           });
 
           onTransform();
@@ -112,7 +116,8 @@ class _TransformableState extends State<Transformable> {
           if (newWidth < _minSize) return;
 
           final updatedSize = Size(newWidth, size.height);
-          final updatedPosition = Offset(position.dx + details.dx, position.dy);
+          final updatedPosition = Offset(
+              position.dx - (newWidth / 2 - size.width / 2), position.dy);
 
           setState(() {
             size = updatedSize;
@@ -127,9 +132,13 @@ class _TransformableState extends State<Transformable> {
           if (newWidth < _minSize) return;
 
           final updatedSize = Size(newWidth, size.height);
+          final updatedPosition = Offset(
+              position.dx - (newWidth / 2 - size.width / 2),
+              position.dy);
 
           setState(() {
             size = updatedSize;
+            position = updatedPosition;
           });
 
           onTransform();
@@ -150,8 +159,9 @@ class _TransformableState extends State<Transformable> {
           if (newHeight < _minSize || newWidth < _minSize) return;
 
           final updatedSize = Size(newWidth, newHeight);
-          final updatedPosition = Offset(position.dx - (newWidth - size.width),
-              position.dy - (newHeight - size.height));
+          final updatedPosition = Offset(
+              position.dx - (newWidth / 2 - size.width / 2),
+              position.dy - (newHeight / 2 - size.height / 2));
 
           setState(() {
             size = updatedSize;
@@ -176,8 +186,9 @@ class _TransformableState extends State<Transformable> {
           if (newHeight < _minSize || newWidth < _minSize) return;
 
           final updatedSize = Size(newWidth, newHeight);
-          final updatedPosition =
-              Offset(position.dx, position.dy - (newHeight - size.height));
+          final updatedPosition = Offset(
+              position.dx - (newWidth / 2 - size.width / 2),
+              position.dy - (newHeight / 2 - size.height / 2));
 
           setState(() {
             size = updatedSize;
@@ -201,8 +212,9 @@ class _TransformableState extends State<Transformable> {
           }
           if (newHeight < _minSize || newWidth < _minSize) return;
           final updatedSize = Size(newWidth, newHeight);
-          final updatedPosition =
-              Offset(position.dx - (newWidth - size.width), position.dy);
+          final updatedPosition = Offset(
+              position.dx - (newWidth / 2 - size.width / 2),
+              position.dy - (newHeight / 2 - size.height / 2));
 
           setState(() {
             size = updatedSize;
@@ -226,9 +238,13 @@ class _TransformableState extends State<Transformable> {
           }
           if (newHeight < _minSize || newWidth < _minSize) return;
           final updatedSize = Size(newWidth, newHeight);
+          final updatedPosition = Offset(
+              position.dx - (newWidth / 2 - size.width / 2),
+              position.dy - (newHeight / 2 - size.height / 2));
 
           setState(() {
             size = updatedSize;
+            position = updatedPosition;
           });
 
           onTransform();
