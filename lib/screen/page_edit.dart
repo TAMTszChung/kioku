@@ -53,6 +53,11 @@ class _PageEditPageState extends State<PageEditPage> {
   void initState() {
     super.initState();
     page = context.read<BookPageProvider>().get(widget.id).copy();
+    items = context
+        .read<PageItemProvider>()
+        .getAllByPageId(widget.id)
+        .map((item) => item.copy())
+        .toList();
   }
 
   //-------------------------- Utility functions --------------------------
@@ -658,12 +663,6 @@ class _PageEditPageState extends State<PageEditPage> {
 
   @override
   Widget build(BuildContext context) {
-    items = context
-        .select<PageItemProvider, List<PageItem>>(
-            (p) => p.getAllByPageId(widget.id))
-        .map((item) => item.copy())
-        .toList();
-
     return WillPopScope(
         //-------------------------- Perform Exit Check -----------------------
         onWillPop: () async {
@@ -731,9 +730,7 @@ class _PageEditPageState extends State<PageEditPage> {
                               await Future.delayed(
                                   const Duration(milliseconds: 300), () async {
                                 //update page thumbnail
-                                Uint8List? pageSnapshot;
-                                await _capturePng()
-                                    .then((value) => pageSnapshot = value);
+                                Uint8List? pageSnapshot = await _capturePng();
                                 final BookPage newPage =
                                     page.copy(thumbnail: pageSnapshot);
 
