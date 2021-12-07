@@ -104,6 +104,14 @@ class AppScreen extends StatefulWidget {
 }
 
 class _AppScreenState extends State<AppScreen> {
+  @override
+  initState() {
+    super.initState();
+    context.read<BookProvider>();
+    context.read<BookPageProvider>();
+    context.read<PageItemProvider>();
+  }
+
   int _selectedIndex = 0;
   static const List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),

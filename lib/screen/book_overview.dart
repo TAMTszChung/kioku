@@ -5,7 +5,6 @@
 
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -23,10 +22,6 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-
-Future<Uint8List> savePDF(pw.Document pdf) async {
-  return await pdf.save();
-}
 
 void generateBookPdf(SendPort port) {
   final rPort = ReceivePort();
