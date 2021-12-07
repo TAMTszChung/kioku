@@ -328,8 +328,7 @@ class _BookOverviewState extends State<BookOverview> {
 
                       final file = await getBookPdf();
                       Navigator.pop(context);
-                      await Share.shareFiles([file.path],
-                          text: 'Exported Memory Book');
+                      await Share.shareFiles([file.path]);
                       file.delete();
                       setState(() {
                         exporting = false;

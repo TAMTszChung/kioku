@@ -34,22 +34,27 @@ class ImageItemCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(10.0),
             ),
             child: Align(
-              alignment: FractionalOffset.bottomCenter,
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white60,
-                ),
-                child: ListView(
-                  shrinkWrap: true,
-                  children: [
-                    ListTile(
-                      title: Text(item.name ?? 'Untitled'),
-                      subtitle: Text(item.categories.join(', ')),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+                alignment: FractionalOffset.bottomCenter,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Container(
+                      constraints:
+                          BoxConstraints(maxHeight: constraints.maxHeight / 2),
+                      decoration: const BoxDecoration(
+                        color: Colors.white60,
+                      ),
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: [
+                          ListTile(
+                            title: Text(item.name ?? 'Untitled'),
+                            subtitle: Text(item.categories.join(', ')),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                )),
           ),
         ),
       ),
