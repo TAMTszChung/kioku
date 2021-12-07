@@ -1,3 +1,8 @@
+/*
+# COMP 4521    #  PANG, Kit        20606678          kpangaa@connect.ust.hk
+# COMP 4521    #  TAM, Tsz Chung        20606173          tctam@connect.ust.hk
+*/
+
 import 'package:flutter/material.dart';
 import 'package:kioku/component/molecule/book.dart';
 import 'package:kioku/component/molecule/book_page.dart';
