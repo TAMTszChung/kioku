@@ -11,6 +11,9 @@ class ImageItemCard extends StatelessWidget {
     return AspectRatio(
       aspectRatio: 1,
       child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
         elevation: 8,
         child: InkWell(
           splashColor: Colors.blue,
@@ -18,6 +21,7 @@ class ImageItemCard extends StatelessWidget {
             Navigator.pushNamed(context, '/item_detail', arguments: item);
           },
           child: Container(
+            clipBehavior: Clip.hardEdge,
             color:
                 item.type != PageItemType.IMAGE ? Colors.blueGrey[800] : null,
             decoration: BoxDecoration(
@@ -27,7 +31,7 @@ class ImageItemCard extends StatelessWidget {
                       fit: BoxFit.cover,
                     )
                   : null,
-              borderRadius: BorderRadius.circular(5),
+              borderRadius: BorderRadius.circular(10.0),
             ),
             child: Align(
               alignment: FractionalOffset.bottomCenter,
