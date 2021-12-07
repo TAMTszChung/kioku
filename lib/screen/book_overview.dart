@@ -311,7 +311,7 @@ class _BookOverviewState extends State<BookOverview> {
                         builder: (BuildContext context) {
                           return Dialog(
                             child: Padding(
-                              padding: EdgeInsets.all(15),
+                              padding: const EdgeInsets.all(15),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment:
@@ -349,7 +349,7 @@ class _BookOverviewState extends State<BookOverview> {
                         builder: (BuildContext context) {
                           return Dialog(
                             child: Padding(
-                              padding: EdgeInsets.all(15),
+                              padding: const EdgeInsets.all(15),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment:
