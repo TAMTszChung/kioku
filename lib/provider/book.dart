@@ -15,10 +15,6 @@ class BookProvider extends DataProvider {
 
     final db = await DBHelper.instance.db;
     final maps = await db.query(tableName);
-    // _books = [
-    //   Book(title: 'Alpha', color: Colors.blue),
-    //   Book(title: 'Beta', color: Colors.yellow),
-    // ];
     _books = maps.map((json) => Book.fromJson(json)).toList();
     notifyListeners();
     return true;
@@ -68,6 +64,16 @@ class BookProvider extends DataProvider {
     }
     notifyListeners();
     return updatedBook;
+  }
+
+  Future<int?> delete(int id) async {
+    final db = await DBHelper.instance.db;
+    final count = await db
+        .delete(tableName, where: '${BookModel.id} = ?', whereArgs: [id]);
+    if (count != 1) return null;
+    _books.removeWhere((book) => book.id == id);
+    notifyListeners();
+    return id;
   }
 
   Book get(int id) {

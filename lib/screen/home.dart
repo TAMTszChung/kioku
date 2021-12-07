@@ -3,6 +3,8 @@ import 'package:kioku/component/atom/input_dialog.dart';
 import 'package:kioku/component/molecule/book.dart';
 import 'package:kioku/model/book.dart';
 import 'package:kioku/provider/book.dart';
+import 'package:kioku/provider/book_page.dart';
+import 'package:kioku/provider/page_item.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,6 +18,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _sortType = 'Title (Ascending)';
+  bool dragging = false;
 
   void sortBook(List<Book> list, String type) {
     setState(() {
@@ -50,6 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final provider = context.watch<BookProvider>();
     final books = provider.books;
     sortBook(books, _sortType);
+    final deviceData = MediaQuery.of(context);
 
     return Scaffold(
         appBar: AppBar(
@@ -57,16 +61,24 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: <Widget>[
             IconButton(
               onPressed: () async {
-                final result = await showTextInputDialog(context,
-                    title: 'Book Title',
-                    hintText: 'Title',
-                    okText: 'OK',
-                    cancelText: 'Cancel', validator: (text) {
-                  if (text == null || text.isEmpty) {
-                    return 'Title cannot be empty';
-                  }
-                  return null;
-                });
+                final result = await showTextInputDialog(
+                  context,
+                  title: 'Book Title',
+                  hintText: 'Title',
+                  okText: 'OK',
+                  cancelText: 'Cancel',
+                  validator: (text) {
+                    if (text == null || text.isEmpty) {
+                      return 'Title cannot be empty';
+                    }
+                    if (RegExp('[^\x00-\x7F]+').hasMatch(text)) {
+                      return 'Title cannot contain unicode characters';
+                    }
+
+                    return null;
+                  },
+                  maxLength: Book.titleLengthLimit,
+                );
 
                 if (result != null) {
                   provider.insert(Book(title: result));
@@ -125,14 +137,70 @@ class _HomeScreenState extends State<HomeScreen> {
                 future: provider.isInitCompleted,
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
-                    return GridView.count(
-                      primary: false,
-                      padding: const EdgeInsets.all(20),
-                      mainAxisSpacing: 40,
-                      crossAxisCount: 2,
-                      children: books
-                          .map((b) => BookWidget.withRoute(b, '/book_overview'))
-                          .toList(),
+                    return Column(
+                      children: [
+                        Expanded(
+                          child: GridView.count(
+                            primary: false,
+                            padding: const EdgeInsets.all(20),
+                            mainAxisSpacing: 40,
+                            crossAxisCount: 2,
+                            children: books
+                                .map((b) => LongPressDraggable<Book>(
+                                      data: b,
+                                      onDragStarted: () {
+                                        setState(() {
+                                          dragging = true;
+                                        });
+                                      },
+                                      onDraggableCanceled: (v, o) {
+                                        setState(() {
+                                          dragging = false;
+                                        });
+                                      },
+                                      feedback: SizedBox(
+                                        height: deviceData.size.width / 2,
+                                        child: BookWidget(b),
+                                      ),
+                                      child: BookWidget.withRoute(
+                                          b, '/book_overview'),
+                                    ))
+                                .toList(),
+                          ),
+                        ),
+                        if (dragging)
+                          DragTarget<Book>(
+                            builder: (context, candidateItems, rejectedItems) {
+                              return Container(
+                                decoration: BoxDecoration(
+                                  color: candidateItems.isNotEmpty
+                                      ? Colors.red[700]
+                                      : null,
+                                ),
+                                constraints: BoxConstraints(
+                                    minHeight: 50,
+                                    maxHeight: 80,
+                                    minWidth: deviceData.size.width,
+                                    maxWidth: deviceData.size.width),
+                                child: const Icon(Icons.delete),
+                              );
+                            },
+                            onAccept: (book) async {
+                              //delete book
+                              await provider.delete(book.id!);
+
+                              //refresh pages
+                              await context.read<BookPageProvider>().fetchAll();
+
+                              //refresh items
+                              await context.read<PageItemProvider>().fetchAll();
+
+                              setState(() {
+                                dragging = false;
+                              });
+                            },
+                          )
+                      ],
                     );
                   } else {
                     return const Center(child: CircularProgressIndicator());

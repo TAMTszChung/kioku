@@ -40,6 +40,8 @@ class Book {
     Colors.red.shade800
   ];
 
+  static int titleLengthLimit = 20;
+
   int? id; // id from database
   String title; // title
   Color color; // color of cover

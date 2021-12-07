@@ -79,6 +79,16 @@ class PageItemProvider extends DataProvider {
     return updatedItem;
   }
 
+  Future<int?> delete(int id) async {
+    final db = await DBHelper.instance.db;
+    final count = await db
+        .delete(tableName, where: '${PageItemModel.id} = ?', whereArgs: [id]);
+    if (count != 1) return null;
+    _items.removeWhere((item) => item.id == id);
+    notifyListeners();
+    return id;
+  }
+
   PageItem get(int id) {
     return _items.singleWhere((page) => page.id == id);
   }
@@ -100,9 +110,19 @@ class PageItemProvider extends DataProvider {
     });
   }
 
-  Future<List<PageItem>> setAll(List<PageItem> listToSet) async {
+  Future<List<PageItem>> setAll(int pageId, List<PageItem> listToSet) async {
+    if (listToSet.any((item) => item.pageId != pageId)) {
+      throw ArgumentError('All items must have identical pageId', 'listToSet');
+    }
     final db = await DBHelper.instance.db;
     final batch = db.batch();
+    final itemsToDelete = _items.where((oldItem) =>
+        oldItem.pageId == pageId &&
+        listToSet.singleWhereOrNull((item) => item.id == oldItem.id) == null);
+    for (var item in itemsToDelete) {
+      batch.delete(tableName,
+          where: '${PageItemModel.id} = ?', whereArgs: [item.id]);
+    }
     final itemsToUpdate = listToSet.where((item) {
       if (item.id == null) return false;
       final oldItem = _items.singleWhere((oldItem) => oldItem.id == item.id);

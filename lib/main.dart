@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:kioku/model/page_item.dart';
 import 'package:kioku/provider/book.dart';
 import 'package:kioku/provider/book_page.dart';
 import 'package:kioku/provider/page_item.dart';
@@ -7,9 +8,10 @@ import 'package:kioku/screen/book_overview.dart';
 import 'package:kioku/screen/book_slideshow.dart';
 import 'package:kioku/screen/cover_edit.dart';
 import 'package:kioku/screen/home.dart';
+import 'package:kioku/screen/item_detail.dart';
 import 'package:kioku/screen/page_edit.dart';
+import 'package:kioku/screen/page_reorder.dart';
 import 'package:kioku/screen/search.dart';
-import 'package:kioku/screen/share.dart';
 import 'package:provider/provider.dart';
 
 void main() => runApp(const MyApp());
@@ -48,10 +50,20 @@ class MyApp extends StatelessWidget {
           onGenerateRoute: (settings) {
             final args = settings.arguments;
             switch (settings.name) {
+              case '/item_detail':
+                if (args is! PageItem) return null;
+                return MaterialPageRoute(builder: (context) {
+                  return ItemDetailScreen(args);
+                });
               case '/book_slideshow':
                 if (args is! int && args is! Iterable<int>) return null;
                 return MaterialPageRoute(builder: (context) {
                   return BookSlideshowPage(args);
+                });
+              case '/page_reorder':
+                if (args is! int) return null;
+                return MaterialPageRoute(builder: (context) {
+                  return PageReorderScreen(args);
                 });
               case '/cover_edit':
                 if (args is! int) return null;
@@ -91,7 +103,6 @@ class _AppScreenState extends State<AppScreen> {
   static const List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
     SearchScreen(),
-    ShareScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -115,10 +126,6 @@ class _AppScreenState extends State<AppScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
             label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.share),
-            label: 'Share',
           ),
         ],
         currentIndex: _selectedIndex,

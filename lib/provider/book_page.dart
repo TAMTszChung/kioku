@@ -97,6 +97,16 @@ class BookPageProvider extends DataProvider {
     return updatedPage;
   }
 
+  Future<int?> delete(int id) async {
+    final db = await DBHelper.instance.db;
+    final count = await db
+        .delete(tableName, where: '${BookPageModel.id} = ?', whereArgs: [id]);
+    if (count != 1) return null;
+    _pages.removeWhere((page) => page.id == id);
+    notifyListeners();
+    return id;
+  }
+
   BookPage get(int? id, {int? bookId, int? pageNumber}) {
     late final BookPage page;
     if (id != null) {
@@ -120,9 +130,19 @@ class BookPageProvider extends DataProvider {
         .sortedBy<num>((page) => page.pageNumber);
   }
 
-  Future<List<BookPage>> setAll(List<BookPage> listToSet) async {
+  Future<List<BookPage>> setAll(int bookId, List<BookPage> listToSet) async {
+    if (listToSet.any((item) => item.bookId != bookId)) {
+      throw ArgumentError('All pages must have identical bookId', 'listToSet');
+    }
     final db = await DBHelper.instance.db;
     final batch = db.batch();
+    final pagesToDelete = _pages.where((oldPage) =>
+        oldPage.bookId == bookId &&
+        listToSet.singleWhereOrNull((page) => page.id == oldPage.id) == null);
+    for (var page in pagesToDelete) {
+      batch.delete(tableName,
+          where: '${BookPageModel.id} = ?', whereArgs: [page.id]);
+    }
     final pagesToUpdate = listToSet.where((page) {
       if (page.id == null) return false;
       final oldPage = _pages.singleWhere((oldPage) => oldPage.id == page.id);

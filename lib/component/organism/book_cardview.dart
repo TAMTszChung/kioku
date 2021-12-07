@@ -1,23 +1,46 @@
 import 'package:flutter/material.dart';
-import 'package:kioku/provider/book.dart';
+import 'package:kioku/component/molecule/image_item_card.dart';
+import 'package:kioku/model/book_page.dart';
+import 'package:kioku/model/page_item.dart';
+import 'package:kioku/provider/book_page.dart';
+import 'package:kioku/provider/page_item.dart';
 import 'package:provider/provider.dart';
 
 class BookCardView extends StatelessWidget {
   final int id;
+  final String category;
 
-  const BookCardView(this.id, {Key? key}) : super(key: key);
+  const BookCardView(this.id, this.category, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<BookProvider>();
-    final book = provider.get(id);
+    final pageProvider = context.watch<BookPageProvider>();
+    List<BookPage> pages = pageProvider.getAllByBookId(id);
+    final itemProvider = context.watch<PageItemProvider>();
+    final List<PageItem> items =
+        itemProvider.getAllByPageIdList(pages.map((p) => p.id!).toList());
+    final imageItems = items
+        .where((item) => item.type == PageItemType.IMAGE)
+        .map((item) => item.copy())
+        .toList();
 
+    if (category != 'All') {
+      imageItems.removeWhere((item) => !item.categories.contains(category));
+    }
+
+    if (imageItems.isEmpty) {
+      return const Center(
+          child: Text(
+        'There is no image items in this book or category!',
+        textAlign: TextAlign.center,
+      ));
+    }
     return GridView.count(
       primary: false,
       padding: const EdgeInsets.all(20),
       mainAxisSpacing: 40,
       crossAxisCount: 2,
-      children: [],
+      children: imageItems.map((item) => ImageItemCard(item)).toList(),
     );
   }
 }

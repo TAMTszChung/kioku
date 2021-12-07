@@ -12,6 +12,7 @@ class PageItemModel extends BaseModel {
   static const pageId = 'page_id';
   static const name = 'name';
   static const type = 'type';
+  static const description = 'description';
   static const data = 'data';
   static const attributes = 'attributes';
   static const categories = 'categories';
@@ -32,9 +33,10 @@ class PageItemModel extends BaseModel {
           DBCol(name: pageId, type: DBType.fromForeign(pageTableIdCol.type)),
           DBCol(name: name, type: DBType.text()),
           DBCol(name: type, type: DBType.text(notNull: true)),
+          DBCol(name: description, type: DBType.text()),
           DBCol(name: data, type: DBType.blob(notNull: true)),
           DBCol(name: attributes, type: DBType.text(notNull: true)),
-          DBCol(name: categories, type: DBType.text()),
+          DBCol(name: categories, type: DBType.text(notNull: true)),
           DBCol(name: coordinateX, type: DBType.real(notNull: true)),
           DBCol(name: coordinateY, type: DBType.real(notNull: true)),
           DBCol(name: width, type: DBType.real(notNull: true)),
@@ -66,9 +68,10 @@ class PageItem {
   int pageId; // id of page owning this item
   String? name; // name
   PageItemType type; // type
+  String? description; // description
   Uint8List data; // data in bytes
   Map<String, String> attributes; // attributes of data
-  List<String>? categories; // categories
+  List<String> categories; // categories
   Point<double> coordinates; // coordinates (x, y are in percent)
   double width; // width (in percent)
   double height; // height (in percent)
@@ -78,14 +81,37 @@ class PageItem {
   final DateTime createTime; // create time from database
   DateTime lastModifiedTime; // last modified time from database
 
+  static const List<String> categoryList = [
+    'Anime',
+    'Baby',
+    'Book',
+    'Design',
+    'Education',
+    'Fashion',
+    'Finance',
+    'Food & Drink',
+    'Hobbies',
+    'Holiday',
+    'Home',
+    'Jewelry',
+    'Lifestyle',
+    'Media',
+    'Music',
+    'People',
+    'Sports',
+    'Tech',
+    'Travel'
+  ];
+
   PageItem._internal(
       {this.id,
       required this.pageId,
       this.name,
       required this.type,
+      this.description,
       required this.data,
       required this.attributes,
-      this.categories,
+      this.categories = const [],
       required this.coordinates,
       required this.width,
       required this.height,
@@ -99,6 +125,7 @@ class PageItem {
       {required int pageId,
       String? name,
       required PageItemType type,
+      String? description,
       required Uint8List data,
       Point<double> coordinates = const Point<double>(0.0, 0.0),
       required double width,
@@ -111,7 +138,7 @@ class PageItem {
     attributes['italic'] = 'false';
     attributes['bold'] = 'false';
     attributes['fontFamily'] = 'Merriweather';
-    attributes['fontSize'] = '20';
+    attributes['fontSize'] = '12.0';
     attributes['color'] = 'ff000000';
     attributes['highlightColor'] = '00000000';
     attributes['backgroundColor'] = '00000000';
@@ -120,6 +147,7 @@ class PageItem {
         pageId: pageId,
         name: name,
         type: type,
+        description: description,
         data: data,
         attributes: attributes,
         coordinates: coordinates,
@@ -133,18 +161,27 @@ class PageItem {
   }
 
   factory PageItem.fromJson(Map<String, Object?> json) {
-    List<String>? categories;
-    final categoriesStr = json[PageItemModel.categories] as String?;
-    if (categoriesStr != null) {
-      categories = categoriesStr.split(',');
-    }
+    Map<String, String> attributes = Map.castFrom(jsonDecode(
+        json[PageItemModel.attributes] as String, reviver: (key, value) {
+      if (key == null) return value;
+      if (key is! String) throw Exception('JSON key must be string');
+      if (value is! String?) return value.toString();
+      return value;
+    }));
+    final categoriesStr = json[PageItemModel.categories] as String;
+    List<String> categories = categoriesStr.split(',');
+    int? datetimeVal = json[PageItemModel.datetime] as int?;
+    DateTime? datetime = datetimeVal != null
+        ? DateTime.fromMillisecondsSinceEpoch(datetimeVal)
+        : null;
     return PageItem._internal(
         id: json[PageItemModel.id] as int,
         pageId: json[PageItemModel.pageId] as int,
         name: json[PageItemModel.name] as String?,
-        type: json[PageItemModel.type] as PageItemType,
+        type: PageItemType(json[PageItemModel.type] as String),
+        description: json[PageItemModel.description] as String?,
         data: json[PageItemModel.data] as Uint8List,
-        attributes: jsonDecode(json[PageItemModel.attributes] as String),
+        attributes: attributes,
         categories: categories,
         coordinates: Point<double>(json[PageItemModel.coordinateX] as double,
             json[PageItemModel.coordinateY] as double),
@@ -152,8 +189,7 @@ class PageItem {
         height: json[PageItemModel.height] as double,
         rotation: json[PageItemModel.rotation] as double,
         zIndex: json[PageItemModel.zIndex] as int,
-        datetime: DateTime.fromMillisecondsSinceEpoch(
-            json[PageItemModel.datetime] as int),
+        datetime: datetime,
         createTime: DateTime.fromMillisecondsSinceEpoch(
             json[PageItemModel.createTime] as int),
         lastModifiedTime: DateTime.fromMillisecondsSinceEpoch(
@@ -165,6 +201,7 @@ class PageItem {
     int? pageId,
     String? name,
     PageItemType? type,
+    String? description,
     Uint8List? data,
     Map<String, String>? attributes,
     List<String>? categories,
@@ -173,6 +210,7 @@ class PageItem {
     double? height,
     double? rotation,
     int? zIndex,
+    DateTime? datetime,
     DateTime? createTime,
     DateTime? lastModifiedTime,
     required PageItem original,
@@ -182,17 +220,16 @@ class PageItem {
         pageId: pageId ?? original.pageId,
         name: name ?? original.name,
         type: type ?? original.type,
+        description: description ?? original.description,
         data: data ?? original.data,
         attributes: attributes ?? Map.from(original.attributes),
-        categories: categories ??
-            (original.categories != null
-                ? List.from(original.categories!)
-                : null),
+        categories: categories ?? List.from(original.categories),
         coordinates: coordinates ?? original.coordinates,
         width: width ?? original.width,
         height: height ?? original.height,
         rotation: rotation ?? original.rotation,
         zIndex: zIndex ?? original.zIndex,
+        datetime: datetime ?? original.datetime,
         createTime: createTime ?? original.createTime,
         lastModifiedTime: lastModifiedTime ?? original.lastModifiedTime);
   }
@@ -201,6 +238,7 @@ class PageItem {
     int? pageId,
     String? name,
     PageItemType? type,
+    String? description,
     Uint8List? data,
     Map<String, String>? attributes,
     List<String>? categories,
@@ -209,12 +247,14 @@ class PageItem {
     double? height,
     double? rotation,
     int? zIndex,
+    DateTime? datetime,
     DateTime? lastModifiedTime,
   }) {
     return PageItem._copy(
         pageId: pageId,
         name: name,
         type: type,
+        description: description,
         data: data,
         attributes: attributes,
         categories: categories,
@@ -223,6 +263,7 @@ class PageItem {
         height: height,
         rotation: rotation,
         zIndex: zIndex,
+        datetime: datetime,
         lastModifiedTime: lastModifiedTime,
         original: this);
   }
@@ -231,16 +272,18 @@ class PageItem {
         PageItemModel.id: id,
         PageItemModel.pageId: pageId,
         PageItemModel.name: name,
-        PageItemModel.type: type,
+        PageItemModel.type: type.value,
+        PageItemModel.description: description,
         PageItemModel.data: data,
         PageItemModel.attributes: jsonEncode(attributes),
-        PageItemModel.categories: categories?.join(','),
+        PageItemModel.categories: categories.join(','),
         PageItemModel.coordinateX: coordinates.x,
         PageItemModel.coordinateY: coordinates.y,
         PageItemModel.width: width,
         PageItemModel.height: height,
         PageItemModel.rotation: rotation,
         PageItemModel.zIndex: zIndex,
+        PageItemModel.datetime: datetime?.millisecondsSinceEpoch,
         PageItemModel.createTime: createTime.millisecondsSinceEpoch,
         PageItemModel.lastModifiedTime: lastModifiedTime.millisecondsSinceEpoch,
       };

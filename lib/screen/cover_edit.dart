@@ -20,6 +20,7 @@ class CoverEditPage extends StatefulWidget {
 class _CoverEditPageState extends State<CoverEditPage> {
   late Book book;
   bool saving = false;
+  String errorMsg = '';
 
   @override
   initState() {
@@ -36,10 +37,12 @@ class _CoverEditPageState extends State<CoverEditPage> {
             saving
                 ? const CircularProgressIndicator()
                 : TextButton(
-                    onPressed: () async {
-                      await context.read<BookProvider>().update(book);
-                      Navigator.pop(context);
-                    },
+                    onPressed: errorMsg.isEmpty
+                        ? () async {
+                            await context.read<BookProvider>().update(book);
+                            Navigator.pop(context);
+                          }
+                        : null,
                     child: const Text('Save'))
           ],
         ),
@@ -54,18 +57,34 @@ class _CoverEditPageState extends State<CoverEditPage> {
               ),
             ),
             TextFormField(
+              maxLength: Book.titleLengthLimit,
               initialValue: book.title,
               decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: 'Please enter a title',
-                  helperText: 'maximum length: 30',
                   contentPadding: EdgeInsets.fromLTRB(12, 5, 12, 5)),
               onChanged: (text) {
+                if (text.isEmpty) {
+                  errorMsg = '*  Title cannot be empty';
+                } else if (RegExp('[^\x00-\x7F]+').hasMatch(text)) {
+                  errorMsg = 'Title cannot contain unicode characters';
+                } else {
+                  errorMsg = '';
+                }
+
                 book.title = text;
                 setState(() {
                   book = book;
+                  errorMsg = errorMsg;
                 });
               },
+            ),
+            Visibility(
+              child: Text(
+                errorMsg,
+                style: const TextStyle(color: Colors.red, fontSize: 14),
+              ),
+              visible: errorMsg.isNotEmpty,
             ),
             const Padding(
               padding: EdgeInsets.fromLTRB(0, 30, 0, 5),

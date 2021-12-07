@@ -6,7 +6,7 @@ import 'package:kioku/model/page_item.dart';
 
 typedef TextChangeCallback = void Function(String?);
 
-class PageItemWidget extends StatefulWidget {
+class PageItemWidget extends StatelessWidget {
   final PageItem item;
   final TextChangeCallback onTextChange;
 
@@ -14,53 +14,48 @@ class PageItemWidget extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<PageItemWidget> createState() => _PageItemWidgetState();
-}
-
-class _PageItemWidgetState extends State<PageItemWidget> {
-  late bool underline = widget.item.attributes['underline'] == 'true';
-  late bool italic = widget.item.attributes['italic'] == 'true';
-  late bool bold = widget.item.attributes['bold'] == 'true';
-  late String fontFamily = widget.item.attributes['fontFamily'] != null
-      ? widget.item.attributes['fontFamily']!
-      : 'Merriweather';
-  late int fontSize = widget.item.attributes['fontSize'] != null
-      ? int.parse(widget.item.attributes['fontSize']!)
-      : 20;
-  late Color fontColor = widget.item.attributes['color'] != null
-      ? Color(int.parse(widget.item.attributes['color']!, radix: 16))
-      : Colors.black;
-  late Color highlightColor = widget.item.attributes['highlightColor'] != null
-      ? Color(int.parse(widget.item.attributes['highlightColor']!, radix: 16))
-      : Colors.transparent;
-  late Color backgroundColor = widget.item.attributes['backgroundColor'] != null
-      ? Color(int.parse(widget.item.attributes['backgroundColor']!, radix: 16))
-      : Colors.transparent;
-
-  TextStyle itemStyle() {
-    switch (fontFamily) {
-      case 'Merriweather':
-      default:
-        return GoogleFonts.merriweather(
-          fontStyle: italic ? FontStyle.italic : null,
-          decoration: underline ? TextDecoration.underline : null,
-          fontWeight: bold ? FontWeight.w500 : FontWeight.normal,
-          color: fontColor,
-          backgroundColor: highlightColor,
-        );
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (widget.item.type == PageItemType.IMAGE) {
-      return Image.memory(widget.item.data);
+    String fontFamily = item.attributes['fontFamily'] != null
+        ? item.attributes['fontFamily']!
+        : 'Merriweather';
+    double fontSize = item.attributes['fontSize'] != null
+        ? double.parse(item.attributes['fontSize']!)
+        : 12.0;
+    Color fontColor = item.attributes['color'] != null
+        ? Color(int.parse(item.attributes['color']!, radix: 16))
+        : Colors.black;
+    Color highlightColor = item.attributes['highlightColor'] != null
+        ? Color(int.parse(item.attributes['highlightColor']!, radix: 16))
+        : Colors.transparent;
+    Color backgroundColor = item.attributes['backgroundColor'] != null
+        ? Color(int.parse(item.attributes['backgroundColor']!, radix: 16))
+        : Colors.transparent;
+
+    TextStyle itemStyle() {
+      return GoogleFonts.getFont(
+        fontFamily,
+        fontStyle:
+            item.attributes['italic'] == 'true' ? FontStyle.italic : null,
+        decoration: item.attributes['underline'] == 'true'
+            ? TextDecoration.underline
+            : null,
+        fontWeight: item.attributes['bold'] == 'true'
+            ? FontWeight.bold
+            : FontWeight.normal,
+        color: fontColor,
+        backgroundColor: highlightColor,
+        fontSize: fontSize,
+      );
+    }
+
+    if (item.type == PageItemType.IMAGE) {
+      return Image.memory(item.data);
     } else {
       return Container(
         decoration: BoxDecoration(
           color: backgroundColor,
         ),
-        child: Text(utf8.decode(widget.item.data), style: itemStyle()),
+        child: Text(utf8.decode(item.data), style: itemStyle()),
       );
     }
   }
