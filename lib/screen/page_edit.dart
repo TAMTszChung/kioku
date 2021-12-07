@@ -666,6 +666,10 @@ class _PageEditPageState extends State<PageEditPage> {
     return WillPopScope(
         //-------------------------- Perform Exit Check -----------------------
         onWillPop: () async {
+          if (saving) {
+            return false;
+          }
+
           final res = await showDialog(
               context: context,
               builder: (BuildContext context) {
@@ -703,44 +707,47 @@ class _PageEditPageState extends State<PageEditPage> {
                           height: 20,
                           child: CircularProgressIndicator()))
                   : IconButton(
-                      onPressed: () async {
-                        setState(() {
-                          _selectedItem = null;
-                          saving = true;
-                        });
+                      onPressed: !saving
+                          ? () async {
+                              setState(() {
+                                _selectedItem = null;
+                                saving = true;
+                              });
 
-                        final List<PageItem> copiedItems =
-                            items.map((item) => item.copy()).toList();
+                              final List<PageItem> copiedItems =
+                                  items.map((item) => item.copy()).toList();
 
-                        for (int i = 0; i < copiedItems.length; i++) {
-                          copiedItems[i].zIndex = i;
-                        }
+                              for (int i = 0; i < copiedItems.length; i++) {
+                                copiedItems[i].zIndex = i;
+                              }
 
-                        await context
-                            .read<PageItemProvider>()
-                            .setAll(widget.id, copiedItems);
+                              await context
+                                  .read<PageItemProvider>()
+                                  .setAll(widget.id, copiedItems);
 
-                        await Future.delayed(Duration.zero, () async {
-                          //update page thumbnail
-                          Uint8List? pageSnapshot;
-                          await _capturePng()
-                              .then((value) => pageSnapshot = value);
-                          final BookPage newPage =
-                              page.copy(thumbnail: pageSnapshot);
+                              await Future.delayed(Duration.zero, () async {
+                                //update page thumbnail
+                                Uint8List? pageSnapshot;
+                                await _capturePng()
+                                    .then((value) => pageSnapshot = value);
+                                final BookPage newPage =
+                                    page.copy(thumbnail: pageSnapshot);
 
-                          await context
-                              .read<BookPageProvider>()
-                              .update(newPage);
+                                await context
+                                    .read<BookPageProvider>()
+                                    .update(newPage);
 
-                          //update book time
-                          final Book book =
-                              context.read<BookProvider>().get(page.bookId);
-                          await context.read<BookProvider>().update(book);
+                                //update book time
+                                final Book book = context
+                                    .read<BookProvider>()
+                                    .get(page.bookId);
+                                await context.read<BookProvider>().update(book);
 
-                          //pop screen
-                          Navigator.pop(context);
-                        });
-                      },
+                                //pop screen
+                                Navigator.pop(context);
+                              });
+                            }
+                          : null,
                       icon: const Icon(Icons.save))
             ],
           ),

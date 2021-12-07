@@ -38,6 +38,10 @@ class _PageReorderScreenState extends State<PageReorderScreen> {
     return WillPopScope(
         //-------------------------- Perform Exit Check -----------------------
         onWillPop: () async {
+          if (saving) {
+            return false;
+          }
+
           final res = await showDialog(
               context: context,
               builder: (BuildContext context) {
