@@ -701,11 +701,13 @@ class _PageEditPageState extends State<PageEditPage> {
             title: const Text('Edit Page'),
             actions: <Widget>[
               saving
-                  ? const Center(
-                      child: SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator()))
+                  ? const Padding(
+                      padding: EdgeInsets.all(14.0),
+                      child: Center(
+                          child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator())))
                   : IconButton(
                       onPressed: !saving
                           ? () async {
@@ -725,7 +727,8 @@ class _PageEditPageState extends State<PageEditPage> {
                                   .read<PageItemProvider>()
                                   .setAll(widget.id, copiedItems);
 
-                              await Future.delayed(Duration.zero, () async {
+                              await Future.delayed(
+                                  const Duration(milliseconds: 300), () async {
                                 //update page thumbnail
                                 Uint8List? pageSnapshot;
                                 await _capturePng()
