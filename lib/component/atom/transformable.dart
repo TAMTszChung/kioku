@@ -338,7 +338,7 @@ class _TransformableState extends State<Transformable> {
               ),
             ),
             child: widget.isText
-                ? Center(child: widget.child)
+                ? widget.child
                 : FittedBox(
                     child: widget.child,
                     fit: BoxFit.fill,

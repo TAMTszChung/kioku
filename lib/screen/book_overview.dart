@@ -317,7 +317,7 @@ class _BookOverviewState extends State<BookOverview> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceAround,
                                 children: const [
-                                  Text("Exporting"),
+                                  Text('Exporting'),
                                   CircularProgressIndicator(),
                                 ],
                               ),
@@ -355,7 +355,7 @@ class _BookOverviewState extends State<BookOverview> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceAround,
                                 children: const [
-                                  Text("Exporting"),
+                                  Text('Exporting'),
                                   CircularProgressIndicator(),
                                 ],
                               ),

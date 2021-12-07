@@ -111,12 +111,11 @@ class _SearchScreenState extends State<SearchScreen> {
                         isDense: true,
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10)),
-                        helperText:
-                            'Enter item name and press return to search',
+                        helperText: 'Enter an item name to search',
                         hintText: 'Search...',
                         contentPadding: const EdgeInsets.symmetric(
                             vertical: 10, horizontal: 10)),
-                    onFieldSubmitted: (text) {
+                    onChanged: (text) {
                       setState(() {
                         _searchedName = text;
                       });

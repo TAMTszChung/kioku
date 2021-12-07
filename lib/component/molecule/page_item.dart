@@ -55,7 +55,7 @@ class PageItemWidget extends StatelessWidget {
         decoration: BoxDecoration(
           color: backgroundColor,
         ),
-        child: Text(utf8.decode(item.data), style: itemStyle()),
+        child: Center(child: Text(utf8.decode(item.data), style: itemStyle())),
       );
     }
   }
