@@ -167,7 +167,7 @@ class _PageEditPageState extends State<PageEditPage> {
     );
   }
 
-  Widget ToolBar(BuildContext context) {
+  Widget toolbar(BuildContext context) {
     if (_selectedItem == null) {
       return Container(
         constraints:
@@ -438,7 +438,7 @@ class _PageEditPageState extends State<PageEditPage> {
               ),
               Positioned(
                 top: 0,
-                child: ToolBar(context),
+                child: toolbar(context),
               ),
               if (_selectedItem != null &&
                   _selectedItem!.type == PageItemType.TEXTBOX)

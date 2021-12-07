@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 const _cornerDiameter = 30.0;
@@ -84,8 +86,16 @@ class _TransformableState extends State<Transformable> {
           if (newHeight < _minSize) return;
 
           final updatedSize = Size(size.width, newHeight);
+
+          final nCos = math.cos(-rotation);
+          final nSin = math.sin(-rotation);
+          final resizedCenter = Offset(0, (newHeight - size.height) / 2);
+          final rotatedCenter = Offset(
+              nCos * (resizedCenter.dx) - nSin * (resizedCenter.dy),
+              nSin * (resizedCenter.dx) + nCos * (resizedCenter.dy));
           final updatedPosition = Offset(
-              position.dx, position.dy - (newHeight / 2 - size.height / 2));
+              position.dx + (rotatedCenter.dx - resizedCenter.dx),
+              position.dy - (rotatedCenter.dy - resizedCenter.dy) + details.dy);
 
           setState(() {
             size = updatedSize;
@@ -100,8 +110,16 @@ class _TransformableState extends State<Transformable> {
           if (newHeight < _minSize) return;
 
           final updatedSize = Size(size.width, newHeight);
+
+          final nCos = math.cos(-rotation);
+          final nSin = math.sin(-rotation);
+          final resizedCenter = Offset(0, (-newHeight + size.height) / 2);
+          final rotatedCenter = Offset(
+              nCos * (resizedCenter.dx) - nSin * (resizedCenter.dy),
+              nSin * (resizedCenter.dx) + nCos * (resizedCenter.dy));
           final updatedPosition = Offset(
-              position.dx, position.dy - (newHeight / 2 - size.height / 2));
+              position.dx + (rotatedCenter.dx - resizedCenter.dx),
+              position.dy - (rotatedCenter.dy - resizedCenter.dy));
 
           setState(() {
             size = updatedSize;
@@ -116,8 +134,16 @@ class _TransformableState extends State<Transformable> {
           if (newWidth < _minSize) return;
 
           final updatedSize = Size(newWidth, size.height);
+
+          final nCos = math.cos(-rotation);
+          final nSin = math.sin(-rotation);
+          final resizedCenter = Offset((-newWidth + size.width) / 2, 0);
+          final rotatedCenter = Offset(
+              nCos * (resizedCenter.dx) - nSin * (resizedCenter.dy),
+              nSin * (resizedCenter.dx) + nCos * (resizedCenter.dy));
           final updatedPosition = Offset(
-              position.dx - (newWidth / 2 - size.width / 2), position.dy);
+              position.dx + (rotatedCenter.dx - resizedCenter.dx) + details.dx,
+              position.dy - (rotatedCenter.dy - resizedCenter.dy));
 
           setState(() {
             size = updatedSize;
@@ -132,9 +158,16 @@ class _TransformableState extends State<Transformable> {
           if (newWidth < _minSize) return;
 
           final updatedSize = Size(newWidth, size.height);
+
+          final nCos = math.cos(-rotation);
+          final nSin = math.sin(-rotation);
+          final resizedCenter = Offset((newWidth - size.width) / 2, 0);
+          final rotatedCenter = Offset(
+              nCos * (resizedCenter.dx) - nSin * (resizedCenter.dy),
+              nSin * (resizedCenter.dx) + nCos * (resizedCenter.dy));
           final updatedPosition = Offset(
-              position.dx - (newWidth / 2 - size.width / 2),
-              position.dy);
+              position.dx + (rotatedCenter.dx - resizedCenter.dx),
+              position.dy - (rotatedCenter.dy - resizedCenter.dy));
 
           setState(() {
             size = updatedSize;
@@ -159,9 +192,21 @@ class _TransformableState extends State<Transformable> {
           if (newHeight < _minSize || newWidth < _minSize) return;
 
           final updatedSize = Size(newWidth, newHeight);
+
+          final nCos = math.cos(-rotation);
+          final nSin = math.sin(-rotation);
+          final resizedCenter = Offset(
+              (-newWidth + size.width) / 2, (newHeight - size.height) / 2);
+          final rotatedCenter = Offset(
+              nCos * (resizedCenter.dx) - nSin * (resizedCenter.dy),
+              nSin * (resizedCenter.dx) + nCos * (resizedCenter.dy));
           final updatedPosition = Offset(
-              position.dx - (newWidth / 2 - size.width / 2),
-              position.dy - (newHeight / 2 - size.height / 2));
+              position.dx +
+                  (rotatedCenter.dx - resizedCenter.dx) -
+                  (newWidth - size.width),
+              position.dy -
+                  (rotatedCenter.dy - resizedCenter.dy) -
+                  (newHeight - size.height));
 
           setState(() {
             size = updatedSize;
@@ -186,9 +231,19 @@ class _TransformableState extends State<Transformable> {
           if (newHeight < _minSize || newWidth < _minSize) return;
 
           final updatedSize = Size(newWidth, newHeight);
+
+          final nCos = math.cos(-rotation);
+          final nSin = math.sin(-rotation);
+          final resizedCenter = Offset(
+              (newWidth - size.width) / 2, (newHeight - size.height) / 2);
+          final rotatedCenter = Offset(
+              nCos * (resizedCenter.dx) - nSin * (resizedCenter.dy),
+              nSin * (resizedCenter.dx) + nCos * (resizedCenter.dy));
           final updatedPosition = Offset(
-              position.dx - (newWidth / 2 - size.width / 2),
-              position.dy - (newHeight / 2 - size.height / 2));
+              position.dx + (rotatedCenter.dx - resizedCenter.dx),
+              position.dy -
+                  (rotatedCenter.dy - resizedCenter.dy) -
+                  (newHeight - size.height));
 
           setState(() {
             size = updatedSize;
@@ -212,9 +267,19 @@ class _TransformableState extends State<Transformable> {
           }
           if (newHeight < _minSize || newWidth < _minSize) return;
           final updatedSize = Size(newWidth, newHeight);
+
+          final nCos = math.cos(-rotation);
+          final nSin = math.sin(-rotation);
+          final resizedCenter = Offset(
+              (-newWidth + size.width) / 2, (-newHeight + size.height) / 2);
+          final rotatedCenter = Offset(
+              nCos * (resizedCenter.dx) - nSin * (resizedCenter.dy),
+              nSin * (resizedCenter.dx) + nCos * (resizedCenter.dy));
           final updatedPosition = Offset(
-              position.dx - (newWidth / 2 - size.width / 2),
-              position.dy - (newHeight / 2 - size.height / 2));
+              position.dx +
+                  (rotatedCenter.dx - resizedCenter.dx) -
+                  (newWidth - size.width),
+              position.dy - (rotatedCenter.dy - resizedCenter.dy));
 
           setState(() {
             size = updatedSize;
@@ -238,9 +303,17 @@ class _TransformableState extends State<Transformable> {
           }
           if (newHeight < _minSize || newWidth < _minSize) return;
           final updatedSize = Size(newWidth, newHeight);
+
+          final nCos = math.cos(-rotation);
+          final nSin = math.sin(-rotation);
+          final resizedCenter = Offset(
+              (newWidth - size.width) / 2, (-newHeight + size.height) / 2);
+          final rotatedCenter = Offset(
+              nCos * (resizedCenter.dx) - nSin * (resizedCenter.dy),
+              nSin * (resizedCenter.dx) + nCos * (resizedCenter.dy));
           final updatedPosition = Offset(
-              position.dx - (newWidth / 2 - size.width / 2),
-              position.dy - (newHeight / 2 - size.height / 2));
+              position.dx + (rotatedCenter.dx - resizedCenter.dx),
+              position.dy - (rotatedCenter.dy - resizedCenter.dy));
 
           setState(() {
             size = updatedSize;
