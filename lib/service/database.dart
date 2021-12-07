@@ -165,8 +165,6 @@ class DBHelper {
   Future<sql.Database> _initDB() async {
     String dbPath = await sql.getDatabasesPath();
     dbPath = path.join(dbPath, _dbName);
-    // TODO: remove this delete statement in production
-    await sql.deleteDatabase(dbPath);
     return await sql.openDatabase(dbPath,
         version: _dbVersion, onConfigure: _onConfigure);
   }
