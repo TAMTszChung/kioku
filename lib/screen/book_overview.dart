@@ -329,7 +329,6 @@ class _BookOverviewState extends State<BookOverview> {
                       final file = await getBookPdf();
                       Navigator.pop(context);
                       await Share.shareFiles([file.path]);
-                      file.delete();
                       setState(() {
                         exporting = false;
                       });
@@ -368,7 +367,6 @@ class _BookOverviewState extends State<BookOverview> {
                       final params =
                           SaveFileDialogParams(sourceFilePath: file.path);
                       await FlutterFileDialog.saveFile(params: params);
-                      file.delete();
                       setState(() {
                         saving = false;
                       });
