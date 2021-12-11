@@ -126,8 +126,27 @@ class _PageEditPageState extends State<PageEditPage> {
     return IconButton(
         onPressed: !saving
             ? () async {
-                final File? res = await CustomImagePicker.pickMedia(
-                    isGallery: true, fixRatio: false);
+                File? res;
+                try {
+                  res = await CustomImagePicker.pickMedia(
+                      isGallery: true, fixRatio: false);
+                } catch (e) {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Fail to load image'),
+                          content: const Text(
+                              'Please check the device setting & permissions.'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        );
+                      });
+                }
                 if (res == null) {
                   return;
                 }
@@ -161,8 +180,28 @@ class _PageEditPageState extends State<PageEditPage> {
       child: IconButton(
           onPressed: !saving
               ? () async {
-                  final File? res = await CustomImagePicker.pickMedia(
-                      isGallery: false, fixRatio: false);
+                  File? res;
+                  try {
+                    res = await CustomImagePicker.pickMedia(
+                        isGallery: false, fixRatio: false);
+                  } catch (e) {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Fail to load image'),
+                            content: const Text(
+                                'Please check the device setting & permissions.'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          );
+                        });
+                  }
+
                   if (res == null) {
                     return;
                   }

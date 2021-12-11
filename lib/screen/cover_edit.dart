@@ -179,8 +179,28 @@ class _CoverEditPageState extends State<CoverEditPage> {
                     ),
                     OutlinedButton(
                       onPressed: () async {
-                        final File? res = await CustomImagePicker.pickMedia(
-                            isGallery: true, fixRatio: true);
+                        File? res;
+                        try {
+                          res = await CustomImagePicker.pickMedia(
+                              isGallery: true, fixRatio: true);
+                        } catch (e) {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Fail to load image'),
+                                  content: const Text(
+                                      'Please check the device setting & permissions.'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                );
+                              });
+                        }
+
                         if (res == null) return;
                         book.cover = await File(res.path).readAsBytes();
                         setState(() {
@@ -191,8 +211,28 @@ class _CoverEditPageState extends State<CoverEditPage> {
                     ),
                     OutlinedButton(
                       onPressed: () async {
-                        final File? res = await CustomImagePicker.pickMedia(
-                            isGallery: false, fixRatio: true);
+                        File? res;
+                        try {
+                          res = await CustomImagePicker.pickMedia(
+                              isGallery: false, fixRatio: true);
+                        } catch (e) {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Fail to load image'),
+                                  content: const Text(
+                                      'Please check the device setting & permissions.'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                );
+                              });
+                        }
+
                         if (res == null) return;
                         book.cover = await File(res.path).readAsBytes();
                         setState(() {

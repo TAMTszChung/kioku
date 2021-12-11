@@ -13,13 +13,17 @@ class CustomImagePicker {
     required bool isGallery,
     required bool fixRatio,
   }) async {
-    final source = isGallery ? ImageSource.gallery : ImageSource.camera;
-    final XFile? pickedFile = await ImagePicker().pickImage(source: source);
+    try {
+      final source = isGallery ? ImageSource.gallery : ImageSource.camera;
+      final XFile? pickedFile = await ImagePicker().pickImage(source: source);
 
-    if (pickedFile == null) return null;
+      if (pickedFile == null) return null;
 
-    final file = File(pickedFile.path);
-    return cropImage(file, fixRatio: fixRatio);
+      final file = File(pickedFile.path);
+      return cropImage(file, fixRatio: fixRatio);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   static Future<File?> cropImage(File file,
