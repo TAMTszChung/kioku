@@ -142,71 +142,97 @@ class _HomeScreenState extends State<HomeScreen> {
                 future: provider.isInitCompleted,
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
-                    return Column(
-                      children: [
-                        Expanded(
-                          child: GridView.count(
-                            primary: false,
-                            padding: const EdgeInsets.all(20),
-                            mainAxisSpacing: 40,
-                            crossAxisCount: 2,
-                            children: books
-                                .map((b) => LongPressDraggable<Book>(
-                                      data: b,
-                                      onDragStarted: () {
-                                        setState(() {
-                                          dragging = true;
-                                        });
-                                      },
-                                      onDraggableCanceled: (v, o) {
-                                        setState(() {
-                                          dragging = false;
-                                        });
-                                      },
-                                      feedback: SizedBox(
-                                        height: deviceData.size.width / 2,
-                                        child: BookWidget(b),
-                                      ),
-                                      child: BookWidget.withRoute(
-                                          b, '/book_overview'),
-                                    ))
-                                .toList(),
+                    if (books.isNotEmpty) {
+                      return Column(
+                        children: [
+                          Expanded(
+                            child: GridView.count(
+                              primary: false,
+                              padding: const EdgeInsets.all(20),
+                              mainAxisSpacing: 40,
+                              crossAxisCount: 2,
+                              children: books
+                                  .map((b) => LongPressDraggable<Book>(
+                                        data: b,
+                                        onDragStarted: () {
+                                          setState(() {
+                                            dragging = true;
+                                          });
+                                        },
+                                        onDraggableCanceled: (v, o) {
+                                          setState(() {
+                                            dragging = false;
+                                          });
+                                        },
+                                        feedback: SizedBox(
+                                          height: deviceData.size.width / 2,
+                                          child: BookWidget(b),
+                                        ),
+                                        child: BookWidget.withRoute(
+                                            b, '/book_overview'),
+                                      ))
+                                  .toList(),
+                            ),
                           ),
+                          if (dragging)
+                            DragTarget<Book>(
+                              builder:
+                                  (context, candidateItems, rejectedItems) {
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    color: candidateItems.isNotEmpty
+                                        ? Colors.red[700]
+                                        : null,
+                                  ),
+                                  constraints: BoxConstraints(
+                                      minHeight: 50,
+                                      maxHeight: 80,
+                                      minWidth: deviceData.size.width,
+                                      maxWidth: deviceData.size.width),
+                                  child: const Icon(Icons.delete),
+                                );
+                              },
+                              onAccept: (book) async {
+                                //delete book
+                                await provider.delete(book.id!);
+
+                                //refresh pages
+                                await context
+                                    .read<BookPageProvider>()
+                                    .fetchAll();
+
+                                //refresh items
+                                await context
+                                    .read<PageItemProvider>()
+                                    .fetchAll();
+
+                                setState(() {
+                                  dragging = false;
+                                });
+                              },
+                            )
+                        ],
+                      );
+                    } else {
+                      return Center(
+                          child: RichText(
+                        text: const TextSpan(
+                          style: TextStyle(color: Colors.black54),
+                          children: [
+                            TextSpan(
+                              text: "Tap ",
+                            ),
+                            WidgetSpan(
+                              alignment: PlaceholderAlignment.middle,
+                              child: Icon(Icons.add, size: 24),
+                            ),
+                            TextSpan(
+                              text: " to create new memory book",
+                            ),
+                          ],
                         ),
-                        if (dragging)
-                          DragTarget<Book>(
-                            builder: (context, candidateItems, rejectedItems) {
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: candidateItems.isNotEmpty
-                                      ? Colors.red[700]
-                                      : null,
-                                ),
-                                constraints: BoxConstraints(
-                                    minHeight: 50,
-                                    maxHeight: 80,
-                                    minWidth: deviceData.size.width,
-                                    maxWidth: deviceData.size.width),
-                                child: const Icon(Icons.delete),
-                              );
-                            },
-                            onAccept: (book) async {
-                              //delete book
-                              await provider.delete(book.id!);
-
-                              //refresh pages
-                              await context.read<BookPageProvider>().fetchAll();
-
-                              //refresh items
-                              await context.read<PageItemProvider>().fetchAll();
-
-                              setState(() {
-                                dragging = false;
-                              });
-                            },
-                          )
-                      ],
-                    );
+                      ));
+                    }
                   } else {
                     return const Center(child: CircularProgressIndicator());
                   }

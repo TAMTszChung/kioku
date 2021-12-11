@@ -35,7 +35,31 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         if (saving) {
           return false;
         }
-        return true;
+
+        final res = await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Leave Item Detail Page'),
+                content: const Text(
+                    'If you have made changes, tap the save button instead.'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, 'OK'),
+                    child: const Text('Leave Anyways'),
+                  ),
+                ],
+              );
+            });
+
+        if (res != null) {
+          return true;
+        }
+        return false;
       },
       child: Scaffold(
         appBar: AppBar(

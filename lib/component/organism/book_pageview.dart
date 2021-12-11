@@ -47,6 +47,25 @@ class _BookPageViewState extends State<BookPageView> {
           ),
         ),
       ),
+      if (pages.isEmpty)
+        Center(
+            child: RichText(
+          text: const TextSpan(
+            style: TextStyle(color: Colors.black54),
+            children: [
+              TextSpan(
+                text: "Tap ",
+              ),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: Icon(Icons.add, size: 24),
+              ),
+              TextSpan(
+                text: " to add a new page",
+              ),
+            ],
+          ),
+        )),
       ...(pages.map((BookPage page) => Center(
             child: LongPressDraggable<BookPage>(
               data: page,

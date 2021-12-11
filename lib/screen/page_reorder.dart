@@ -56,7 +56,7 @@ class _PageReorderScreenState extends State<PageReorderScreen> {
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, 'OK'),
-                      child: const Text('OK'),
+                      child: const Text('Leave Anyways'),
                     ),
                   ],
                 );

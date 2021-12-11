@@ -161,16 +161,25 @@ class _SearchScreenState extends State<SearchScreen> {
                     )
                   ],
                 ),
-              Expanded(
-                child: GridView.count(
-                  primary: false,
-                  padding: const EdgeInsets.all(20),
-                  mainAxisSpacing: 40,
-                  crossAxisCount: 2,
-                  children:
-                      getCurrentItem().map((i) => ImageItemCard(i)).toList(),
-                ),
-              ),
+              items.isEmpty
+                  ? const Expanded(
+                      child: Center(
+                          child: Text(
+                      'You have no image items! Try create a new memory book and add images to its pages!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.black54),
+                    )))
+                  : Expanded(
+                      child: GridView.count(
+                        primary: false,
+                        padding: const EdgeInsets.all(20),
+                        mainAxisSpacing: 40,
+                        crossAxisCount: 2,
+                        children: getCurrentItem()
+                            .map((i) => ImageItemCard(i))
+                            .toList(),
+                      ),
+                    ),
             ],
           ),
         ),

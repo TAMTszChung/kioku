@@ -36,8 +36,9 @@ class BookListView extends StatelessWidget {
     if (imageItems.isEmpty) {
       return const Center(
           child: Text(
-        'There is no image items in this book or category!',
+        'There is no image items in this book or category!\nTry adding images in pages!',
         textAlign: TextAlign.center,
+        style: TextStyle(color: Colors.black54),
       ));
     }
 
