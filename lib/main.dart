@@ -12,6 +12,7 @@ import 'package:kioku/provider/page_item.dart';
 import 'package:kioku/screen/book_overview.dart';
 import 'package:kioku/screen/book_slideshow.dart';
 import 'package:kioku/screen/cover_edit.dart';
+import 'package:kioku/screen/help.dart';
 import 'package:kioku/screen/home.dart';
 import 'package:kioku/screen/item_detail.dart';
 import 'package:kioku/screen/page_edit.dart';
@@ -116,6 +117,7 @@ class _AppScreenState extends State<AppScreen> {
   static const List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
     SearchScreen(),
+    HelpScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -139,6 +141,10 @@ class _AppScreenState extends State<AppScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
             label: 'Search',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.help),
+            label: 'Help',
           ),
         ],
         currentIndex: _selectedIndex,

@@ -41,14 +41,14 @@ class _CoverEditPageState extends State<CoverEditPage> {
           actions: <Widget>[
             saving
                 ? const CircularProgressIndicator()
-                : TextButton(
+                : IconButton(
                     onPressed: errorMsg.isEmpty
                         ? () async {
                             await context.read<BookProvider>().update(book);
                             Navigator.pop(context);
                           }
                         : null,
-                    child: const Text('Save'))
+                    icon: const Icon(Icons.save)),
           ],
         ),
         body: ListView(
