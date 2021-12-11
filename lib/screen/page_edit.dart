@@ -4,7 +4,6 @@
 */
 
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -13,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kioku/component/atom/input_dialog.dart';
 import 'package:kioku/component/atom/transformable.dart';
@@ -84,8 +84,21 @@ class _PageEditPageState extends State<PageEditPage> {
       final ui.Image image = await boundary.toImage(pixelRatio: 4);
       final ByteData? byteData =
           await image.toByteData(format: ui.ImageByteFormat.png);
-      final Uint8List pngBytes = byteData!.buffer.asUint8List();
-      return pngBytes;
+      Uint8List data = byteData!.buffer.asUint8List();
+      int quality = 100;
+      while (true) {
+        final compressedData = await FlutterImageCompress.compressWithList(data,
+            minWidth: 3840, minHeight: 3840, quality: quality);
+        if (compressedData.length <= 1677721) {
+          data = compressedData;
+          break;
+        }
+        quality -= 10;
+        if (quality < 10) {
+          throw Exception('Image too large!');
+        }
+      }
+      return data;
     } catch (e) {
       return null;
     }
@@ -126,9 +139,9 @@ class _PageEditPageState extends State<PageEditPage> {
     return IconButton(
         onPressed: !saving
             ? () async {
-                File? res;
+                Uint8List? imageData;
                 try {
-                  res = await CustomImagePicker.pickMedia(
+                  imageData = await CustomImagePicker.pickMedia(
                       isGallery: true, fixRatio: false);
                 } catch (e) {
                   showDialog(
@@ -137,7 +150,7 @@ class _PageEditPageState extends State<PageEditPage> {
                         return AlertDialog(
                           title: const Text('Fail to load image'),
                           content: const Text(
-                              'Please check the device setting & permissions.'),
+                              'Possible reasons:\n  1. Please check the device setting & permissions.\n  2. Image file may be too large.'),
                           actions: <Widget>[
                             TextButton(
                               onPressed: () => Navigator.pop(context),
@@ -147,11 +160,10 @@ class _PageEditPageState extends State<PageEditPage> {
                         );
                       });
                 }
-                if (res == null) {
+                if (imageData == null) {
                   return;
                 }
-                final imageBytes = await File(res.path).readAsBytes();
-                final imageFile = await decodeImageFromList(imageBytes);
+                final imageFile = await decodeImageFromList(imageData);
 
                 final ratioDimension = dimensionToAllowedPercentage(Size(
                     imageFile.width.toDouble(), imageFile.height.toDouble()));
@@ -159,7 +171,7 @@ class _PageEditPageState extends State<PageEditPage> {
                 final newItem = PageItem(
                     pageId: widget.id,
                     type: PageItemType.IMAGE,
-                    data: imageBytes,
+                    data: imageData,
                     coordinates: const Point(0.1, 0.1),
                     width: ratioDimension.width,
                     height: ratioDimension.height,
@@ -180,9 +192,9 @@ class _PageEditPageState extends State<PageEditPage> {
       child: IconButton(
           onPressed: !saving
               ? () async {
-                  File? res;
+                  Uint8List? imageData;
                   try {
-                    res = await CustomImagePicker.pickMedia(
+                    imageData = await CustomImagePicker.pickMedia(
                         isGallery: false, fixRatio: false);
                   } catch (e) {
                     showDialog(
@@ -191,7 +203,7 @@ class _PageEditPageState extends State<PageEditPage> {
                           return AlertDialog(
                             title: const Text('Fail to load image'),
                             content: const Text(
-                                'Please check the device setting & permissions.'),
+                                'Possible reasons:\n  1. Please check the device setting & permissions.\n  2. Image file may be too large.'),
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
@@ -202,11 +214,10 @@ class _PageEditPageState extends State<PageEditPage> {
                         });
                   }
 
-                  if (res == null) {
+                  if (imageData == null) {
                     return;
                   }
-                  final imageBytes = await File(res.path).readAsBytes();
-                  final imageFile = await decodeImageFromList(imageBytes);
+                  final imageFile = await decodeImageFromList(imageData);
 
                   final ratioDimension = dimensionToAllowedPercentage(Size(
                       imageFile.width.toDouble(), imageFile.height.toDouble()));
@@ -214,7 +225,7 @@ class _PageEditPageState extends State<PageEditPage> {
                   final newItem = PageItem(
                       pageId: widget.id,
                       type: PageItemType.IMAGE,
-                      data: imageBytes,
+                      data: imageData,
                       coordinates: const Point<double>(0.1, 0.1),
                       width: ratioDimension.width,
                       height: ratioDimension.height,

@@ -3,7 +3,7 @@
 # COMP 4521    #  TAM, Tsz Chung        20606173          tctam@connect.ust.hk
 */
 
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -179,9 +179,9 @@ class _CoverEditPageState extends State<CoverEditPage> {
                     ),
                     OutlinedButton(
                       onPressed: () async {
-                        File? res;
+                        Uint8List? imageData;
                         try {
-                          res = await CustomImagePicker.pickMedia(
+                          imageData = await CustomImagePicker.pickMedia(
                               isGallery: true, fixRatio: true);
                         } catch (e) {
                           showDialog(
@@ -190,7 +190,7 @@ class _CoverEditPageState extends State<CoverEditPage> {
                                 return AlertDialog(
                                   title: const Text('Fail to load image'),
                                   content: const Text(
-                                      'Please check the device setting & permissions.'),
+                                      'Possible reasons:\n  1. Please check the device setting & permissions.\n  2. Image file may be too large.'),
                                   actions: <Widget>[
                                     TextButton(
                                       onPressed: () => Navigator.pop(context),
@@ -201,8 +201,8 @@ class _CoverEditPageState extends State<CoverEditPage> {
                               });
                         }
 
-                        if (res == null) return;
-                        book.cover = await File(res.path).readAsBytes();
+                        if (imageData == null) return;
+                        book.cover = imageData;
                         setState(() {
                           book = book;
                         });
@@ -211,9 +211,9 @@ class _CoverEditPageState extends State<CoverEditPage> {
                     ),
                     OutlinedButton(
                       onPressed: () async {
-                        File? res;
+                        Uint8List? imageData;
                         try {
-                          res = await CustomImagePicker.pickMedia(
+                          imageData = await CustomImagePicker.pickMedia(
                               isGallery: false, fixRatio: true);
                         } catch (e) {
                           showDialog(
@@ -222,7 +222,7 @@ class _CoverEditPageState extends State<CoverEditPage> {
                                 return AlertDialog(
                                   title: const Text('Fail to load image'),
                                   content: const Text(
-                                      'Please check the device setting & permissions.'),
+                                      'Possible reasons:\n  1. Please check the device setting & permissions.\n  2. Image file may be too large.'),
                                   actions: <Widget>[
                                     TextButton(
                                       onPressed: () => Navigator.pop(context),
@@ -233,8 +233,8 @@ class _CoverEditPageState extends State<CoverEditPage> {
                               });
                         }
 
-                        if (res == null) return;
-                        book.cover = await File(res.path).readAsBytes();
+                        if (imageData == null) return;
+                        book.cover = imageData;
                         setState(() {
                           book = book;
                         });

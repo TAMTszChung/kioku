@@ -4,51 +4,60 @@
 */
 
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CustomImagePicker {
-  static Future<File?> pickMedia({
+  static Future<Uint8List?> pickMedia({
     required bool isGallery,
     required bool fixRatio,
   }) async {
-    try {
-      final source = isGallery ? ImageSource.gallery : ImageSource.camera;
-      final XFile? pickedFile = await ImagePicker().pickImage(source: source);
+    final source = isGallery ? ImageSource.gallery : ImageSource.camera;
+    final XFile? pickedFile = await ImagePicker().pickImage(source: source);
 
-      if (pickedFile == null) return null;
+    if (pickedFile == null) return null;
 
-      final file = File(pickedFile.path);
-      return cropImage(file, fixRatio: fixRatio);
-    } catch (e) {
-      rethrow;
-    }
+    final file = File(pickedFile.path);
+    return cropImage(file, fixRatio: fixRatio);
   }
 
-  static Future<File?> cropImage(File file,
-      {required bool fixRatio, int maxSize = 2097152}) async {
-    final fileSize = await file.length();
-    final compressRatio =
-        fileSize > maxSize ? ((maxSize / fileSize) * 100).floor() : 100;
-
+  static Future<Uint8List?> cropImage(File file,
+      {required bool fixRatio}) async {
     File? croppedFile;
     if (fixRatio) {
       croppedFile = await ImageCropper.cropImage(
         sourcePath: file.path,
         aspectRatio: const CropAspectRatio(ratioX: 210, ratioY: 297),
         aspectRatioPresets: const [],
-        compressQuality: compressRatio,
+        compressQuality: 100,
       );
     } else {
       croppedFile = await ImageCropper.cropImage(
           sourcePath: file.path,
-          compressQuality: compressRatio,
+          compressQuality: 100,
           androidUiSettings: const AndroidUiSettings(
               initAspectRatio: CropAspectRatioPreset.original,
               lockAspectRatio: false));
     }
+    if (croppedFile == null) return null;
 
-    return croppedFile;
+    Uint8List data = await croppedFile.readAsBytes();
+    int quality = 100;
+    while (true) {
+      final compressedData = await FlutterImageCompress.compressWithList(data,
+          minWidth: 3840, minHeight: 3840, quality: quality);
+      if (compressedData.length <= 1677721) {
+        data = compressedData;
+        break;
+      }
+      quality -= 20;
+      if (quality < 20) {
+        throw Exception('Image too large!');
+      }
+    }
+    return data;
   }
 }

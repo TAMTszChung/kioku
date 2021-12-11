@@ -155,6 +155,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       FormBuilderTextField(
+                        maxLength: 30,
                         name: ItemDetailScreen.nameField,
                         initialValue: widget.item.name,
                         decoration: InputDecoration(
@@ -169,6 +170,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       Padding(
                         padding: const EdgeInsets.only(top: 20),
                         child: FormBuilderTextField(
+                          maxLength: 200,
                           name: ItemDetailScreen.descriptionField,
                           initialValue: widget.item.description,
                           decoration: InputDecoration(
