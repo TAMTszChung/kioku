@@ -823,95 +823,95 @@ class _PageEditPageState extends State<PageEditPage> {
                     child: AspectRatio(
                         aspectRatio: 210 / 297,
                         child: LayoutBuilder(builder: (context, constraints) {
-                          return Container(
-                              decoration: BoxDecoration(
-                                color: page.color,
-                                borderRadius: BorderRadius.circular(15),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 3,
-                                    blurRadius: 7,
-                                    offset: const Offset(0, 2),
+                          return RepaintBoundary(
+                              key: _globalKey,
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                    color: page.color,
+                                    borderRadius: BorderRadius.circular(15),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 3,
+                                        blurRadius: 7,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                              clipBehavior: Clip.antiAlias,
-                              //-------------- Widget Stack --------------
-                              child: RepaintBoundary(
-                                key: _globalKey,
-                                child: Stack(
-                                  children: items.map((item) {
-                                    final double left = item.coordinates.x *
-                                        constraints.maxWidth;
-                                    final double top = item.coordinates.y *
-                                        constraints.maxHeight;
-                                    final double height =
-                                        item.height * constraints.maxHeight;
-                                    final double width =
-                                        item.width * constraints.maxWidth;
+                                  clipBehavior: Clip.antiAlias,
+                                  //-------------- Widget Stack --------------
+                                  child: Stack(
+                                    children: items.map((item) {
+                                      final double left = item.coordinates.x *
+                                          constraints.maxWidth;
+                                      final double top = item.coordinates.y *
+                                          constraints.maxHeight;
+                                      final double height =
+                                          item.height * constraints.maxHeight;
+                                      final double width =
+                                          item.width * constraints.maxWidth;
 
-                                    final Widget itemWidget =
-                                        PageItemWidget(item, (text) {
-                                      item.data = Uint8List.fromList(
-                                          utf8.encode(text ?? ''));
-                                    });
+                                      final Widget itemWidget =
+                                          PageItemWidget(item, (text) {
+                                        item.data = Uint8List.fromList(
+                                            utf8.encode(text ?? ''));
+                                      });
 
-                                    if (item == _selectedItem) {
-                                      return Transformable(
-                                        child: itemWidget,
-                                        size: Size(width, height),
-                                        position: Offset(left, top),
-                                        rotation: item.rotation,
-                                        isText:
-                                            item.type == PageItemType.TEXTBOX,
-                                        onTransform:
-                                            (size, position, rotation) {
-                                          item.width =
-                                              size.width / constraints.maxWidth;
-                                          item.height = size.height /
-                                              constraints.maxHeight;
-                                          final newX = position.dx /
-                                              constraints.maxWidth;
-                                          final newY = position.dy /
-                                              constraints.maxHeight;
-                                          item.coordinates = Point(newX, newY);
-                                          item.rotation = rotation;
-                                          setState(() {
-                                            items = items;
-                                          });
-                                        },
-                                      );
-                                    } else {
-                                      return Positioned(
-                                          top: top,
-                                          left: left,
-                                          child: Transform.rotate(
-                                              angle: item.rotation,
-                                              child: SizedBox(
-                                                height: height,
-                                                width: width,
-                                                child: GestureDetector(
-                                                  behavior:
-                                                      HitTestBehavior.opaque,
-                                                  onTapDown: (details) {
-                                                    if (saving) return;
-                                                    setState(() {
-                                                      _selectedItem = item;
-                                                    });
-                                                  },
-                                                  child: item.type ==
-                                                          PageItemType.IMAGE
-                                                      ? FittedBox(
-                                                          child: itemWidget,
-                                                          fit: BoxFit.fill)
-                                                      : itemWidget,
-                                                ),
-                                              )));
-                                    }
-                                  }).toList(),
-                                ),
-                              ));
+                                      if (item == _selectedItem) {
+                                        return Transformable(
+                                          child: itemWidget,
+                                          size: Size(width, height),
+                                          position: Offset(left, top),
+                                          rotation: item.rotation,
+                                          isText:
+                                              item.type == PageItemType.TEXTBOX,
+                                          onTransform:
+                                              (size, position, rotation) {
+                                            item.width = size.width /
+                                                constraints.maxWidth;
+                                            item.height = size.height /
+                                                constraints.maxHeight;
+                                            final newX = position.dx /
+                                                constraints.maxWidth;
+                                            final newY = position.dy /
+                                                constraints.maxHeight;
+                                            item.coordinates =
+                                                Point(newX, newY);
+                                            item.rotation = rotation;
+                                            setState(() {
+                                              items = items;
+                                            });
+                                          },
+                                        );
+                                      } else {
+                                        return Positioned(
+                                            top: top,
+                                            left: left,
+                                            child: Transform.rotate(
+                                                angle: item.rotation,
+                                                child: SizedBox(
+                                                  height: height,
+                                                  width: width,
+                                                  child: GestureDetector(
+                                                    behavior:
+                                                        HitTestBehavior.opaque,
+                                                    onTapDown: (details) {
+                                                      if (saving) return;
+                                                      setState(() {
+                                                        _selectedItem = item;
+                                                      });
+                                                    },
+                                                    child: item.type ==
+                                                            PageItemType.IMAGE
+                                                        ? FittedBox(
+                                                            child: itemWidget,
+                                                            fit: BoxFit.fill)
+                                                        : itemWidget,
+                                                  ),
+                                                )));
+                                      }
+                                    }).toList(),
+                                  )));
                         })),
                   ),
                 ),
