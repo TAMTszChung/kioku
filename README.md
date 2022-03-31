@@ -11,3 +11,8 @@ Kioku - Your Personal Memory Book
 
 PANG, Kit <kpangaa@connect.ust.hk>
 TAM, Tsz Chung <tctam@connect.ust.hk>
+
+
+## Simple Demo
+https://user-images.githubusercontent.com/70992518/160986759-2d0229b2-fcb2-4323-af91-11810f09825f.mp4
+
